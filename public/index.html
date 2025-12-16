@@ -35,31 +35,58 @@
             try {
                 // 1. Generate Image
                 const element = document.getElementById('paper-container');
+                
+                // Get the original scroll position to restore later if needed (though onclone handles most)
+                const originalWidth = element.offsetWidth;
+
                 const canvas = await html2canvas(element, {
-                    scale: 3, // Higher resolution (crisper text on mobile)
+                    scale: 2, // Standard print quality
                     useCORS: true,
-                    backgroundColor: '#ffffff', // Ensure base is white
+                    backgroundColor: '#ffffff', // Canvas background
                     logging: false,
+                    // width: 800, // Force canvas width (optional, but onclone styling is better)
+                    windowWidth: 1200, // Simulate a desktop window size
                     onclone: (clonedDoc) => {
                         const clonedElement = clonedDoc.getElementById('paper-container');
                         if (clonedElement) {
-                            // FORCE pure white background for the saved file
+                            // 1. LOCK DIMENSIONS: Force desktop layout (A4-ish width)
+                            // This ensures the image looks the same whether signed on a phone or PC.
+                            clonedElement.style.width = '800px';
+                            clonedElement.style.minWidth = '800px';
+                            clonedElement.style.maxWidth = '800px';
+                            clonedElement.style.height = 'auto';
+                            clonedElement.style.margin = '0';
+                            clonedElement.style.padding = '40px'; // Standardize padding
+
+                            // 2. REMOVE ANIMATIONS & TRANSFORMS: Prevents "tilted" or "mid-animation" captures
+                            clonedElement.classList.remove('animate-paper-entry');
+                            clonedElement.style.transform = 'none';
+                            clonedElement.style.animation = 'none';
+                            clonedElement.style.transition = 'none';
+
+                            // 3. FORCE PURE WHITE & REMOVE STYLING ARTIFACTS
                             clonedElement.style.backgroundColor = '#ffffff';
-                            // Remove shadows and borders for a clean "scanned" look
-                            clonedElement.style.boxShadow = 'none';
-                            clonedElement.style.border = 'none';
-                            clonedElement.style.borderRadius = '0';
-                            // Remove any background patterns
                             clonedElement.style.backgroundImage = 'none';
-                            // Ensure text is high-contrast black
+                            clonedElement.style.boxShadow = 'none';
+                            clonedElement.style.border = '1px solid #000'; // Add simple border for scanned look
+                            clonedElement.style.borderRadius = '0';
+                            
+                            // 4. Ensure all text is black and crisp
                             clonedElement.style.color = '#000000';
+                            
+                            // Fix flex wrapping issues on mobile-simulated clones
+                            // Find specific flex containers if necessary, but fixed width usually solves it.
                         }
                         
-                        // Force inputs to look like plain text (remove background colors if any)
+                        // Force inputs to look like plain text
                         const inputs = clonedDoc.querySelectorAll('input');
                         inputs.forEach(input => {
-                            input.style.backgroundColor = 'transparent';
+                            input.style.backgroundColor = '#ffffff'; // Force white background on inputs too
+                            input.style.border = 'none';
+                            input.style.borderBottom = '1px solid #000';
                             input.style.color = '#000000';
+                            input.style.borderRadius = '0';
+                            input.style.boxShadow = 'none';
                         });
                     }
                 });
