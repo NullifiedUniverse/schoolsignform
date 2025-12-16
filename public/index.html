@@ -2,13 +2,300 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>出國證件自帶切結書</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>出國證件自帶切結書 | Secure Form</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        serif: ['"Noto Serif TC"', 'serif'],
+                        sans: ['"Inter"', 'system-ui', 'sans-serif'],
+                    },
+                    colors: {
+                        paper: '#fdfbf7', // Warm paper white
+                        ink: '#1e293b',   // Deep slate for text
+                        accent: '#0f766e', // Teal for branding
+                    },
+                    boxShadow: {
+                        'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.07)',
+                        'lift': '0 10px 40px -10px rgba(0,0,0,0.1)',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Serif+TC:wght@400;700&display=swap');
+        
+        body {
+            background-color: #f3f4f6;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(15, 118, 110, 0.05) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.05) 0px, transparent 50%);
+            background-attachment: fixed;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* --- Animations --- */
+        @keyframes bentoBounce {
+            0% { opacity: 0; transform: scale(0.95) translateY(20px); }
+            60% { opacity: 1; transform: scale(1.02) translateY(-5px); }
+            100% { transform: scale(1) translateY(0); }
+        }
+
+        .animate-bento {
+            animation: bentoBounce 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; /* Spring effect */
+        }
+        
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; }
+
+        /* --- Form Elements --- */
+        .input-group {
+            position: relative;
+            transition: all 0.2s ease;
+        }
+        
+        .input-field {
+            width: 100%;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            padding: 1rem 1rem 0.5rem; /* Top padding for label space */
+            font-size: 1.1rem;
+            color: #334155;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            outline: none;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+        }
+        
+        .input-field:focus {
+            background: #ffffff;
+            border-color: #0f766e;
+            box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.1);
+        }
+
+        .input-label {
+            position: absolute;
+            left: 1rem;
+            top: 0.35rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            pointer-events: none;
+            transition: all 0.2s ease;
+        }
+
+        /* Checkbox Styling */
+        .checkbox-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            transition: all 0.2s ease;
+        }
+        .checkbox-card:hover {
+            border-color: #0f766e;
+            background: #f0fdfa;
+        }
+        .checkbox-card input:checked + div {
+            color: #0f766e;
+            font-weight: 600;
+        }
+
+        /* Toast */
+        .toast-enter {
+            animation: toastPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        @keyframes toastPop {
+            0% { opacity: 0; transform: translateY(-20px) scale(0.9); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+    </style>
+</head>
+<body class="min-h-screen py-8 px-4 flex justify-center items-start text-ink font-serif selection:bg-teal-100 selection:text-teal-900">
+
+    <div id="toast-container" class="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 flex flex-col gap-2 w-full max-w-sm px-4"></div>
+
+    <!-- Main Card -->
+    <main id="paper-container" class="animate-bento w-full max-w-[850px] bg-paper rounded-3xl shadow-lift p-6 md:p-12 relative border border-white/50 backdrop-blur-sm">
+        
+        <!-- Header -->
+        <header class="text-center mb-10 border-b-2 border-slate-100 pb-8">
+            <div class="inline-block px-4 py-1 rounded-full bg-teal-50 text-teal-700 text-sm font-bold tracking-widest mb-3 font-sans uppercase">Official Document</div>
+            <h1 class="text-3xl md:text-4xl font-bold text-slate-800 mb-2">出國證件自帶切結書</h1>
+            <p class="text-slate-500 text-lg">Travel Document Responsibility Agreement</p>
+        </header>
+
+        <div class="space-y-8">
+            <!-- School Info (Static) -->
+            <div class="flex items-center gap-4 text-slate-600 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+                <div>
+                    <span class="block text-xs font-bold uppercase tracking-wider text-slate-400 font-sans">Organization / School</span>
+                    <span class="font-bold text-lg">康橋國際學校 林口校區</span>
+                </div>
+            </div>
+
+            <!-- Student Info Section -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="input-group">
+                    <input type="text" id="student-name" class="input-field pt-6" placeholder=" " required maxlength="20">
+                    <label for="student-name" class="input-label">Student Name (學生姓名)</label>
+                </div>
+                <div class="input-group">
+                    <input type="text" id="student-id" class="input-field pt-6" placeholder=" " required maxlength="15">
+                    <label for="student-id" class="input-label">Student ID (學號)</label>
+                </div>
+            </div>
+
+            <!-- Parent Info -->
+            <div class="input-group">
+                <input type="text" id="parent-name" class="input-field pt-6" placeholder=" " required maxlength="20">
+                <label for="parent-name" class="input-label">Parent / Guardian Name (家長姓名)</label>
+                <div class="absolute right-4 top-4 text-slate-400 text-sm pointer-events-none hidden md:block">先生/小姐 (甲方)</div>
+            </div>
+
+            <!-- Context Block -->
+            <div class="prose prose-slate max-w-none bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+                <p class="mb-4">
+                    茲參加由 <strong class="text-teal-700">金銀島旅行社</strong> 安排於 
+                    <span class="font-mono bg-slate-100 px-2 py-0.5 rounded text-sm mx-1">2025/01/11</span> 
+                    出發之「114 學年度 11 年級修業旅行活動」。
+                </p>
+                <p class="font-bold mb-3 text-slate-800">甲方願意自行攜帶以下個人證件：</p>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                    <label class="checkbox-card flex items-center p-3 cursor-pointer group">
+                        <input type="checkbox" class="w-5 h-5 text-teal-600 rounded focus:ring-teal-500 border-gray-300" checked>
+                        <div class="ml-3 text-slate-600 group-hover:text-teal-700 transition-colors">有效護照正本</div>
+                    </label>
+                    <label class="checkbox-card flex items-center p-3 cursor-pointer group">
+                        <input type="checkbox" class="w-5 h-5 text-teal-600 rounded focus:ring-teal-500 border-gray-300">
+                        <div class="ml-3 text-slate-600 group-hover:text-teal-700 transition-colors">居留證</div>
+                    </label>
+                    <label class="checkbox-card flex items-center p-3 cursor-pointer group">
+                        <input type="checkbox" class="w-5 h-5 text-teal-600 rounded focus:ring-teal-500 border-gray-300">
+                        <div class="ml-3 text-slate-600 group-hover:text-teal-700 transition-colors">役男出國許可</div>
+                    </label>
+                    <label class="checkbox-card flex items-center p-3 cursor-pointer group">
+                        <input type="checkbox" class="w-5 h-5 text-teal-600 rounded focus:ring-teal-500 border-gray-300">
+                        <div class="ml-3 text-slate-600 group-hover:text-teal-700 transition-colors">有效簽證</div>
+                    </label>
+                </div>
+
+                <p class="text-sm text-slate-500 leading-relaxed text-justify">
+                    前往指定地點報到，辦理登機手續。若因證件問題導致權益受損，由團員自行負責。
+                </p>
+            </div>
+
+            <!-- Signature Section -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+                <!-- Student Sig -->
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="font-bold text-slate-800 flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-red-500"></span>
+                            Student Signature
+                        </span>
+                        <button onclick="clearPad('student')" data-html2canvas-ignore class="text-xs font-bold text-red-500 hover:bg-red-50 px-3 py-1.5 rounded-lg transition-colors uppercase tracking-wider">Clear</button>
+                    </div>
+                    <div class="relative w-full h-40 bg-slate-50 rounded-xl border-2 border-dashed border-slate-300 hover:border-teal-400 transition-colors overflow-hidden">
+                        <canvas id="canvas-student" class="absolute top-0 left-0 w-full h-full cursor-crosshair touch-none"></canvas>
+                        <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-10">
+                            <span class="text-4xl font-serif italic text-slate-400">Sign Here</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Parent Sig -->
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="flex flex-col">
+                            <span class="font-bold text-slate-800 flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-red-500"></span>
+                                Parent Signature
+                            </span>
+                            <span class="text-xs text-slate-400 pl-4">Required for minors</span>
+                        </div>
+                        <button onclick="clearPad('parent')" data-html2canvas-ignore class="text-xs font-bold text-red-500 hover:bg-red-50 px-3 py-1.5 rounded-lg transition-colors uppercase tracking-wider">Clear</button>
+                    </div>
+                    <div class="relative w-full h-40 bg-slate-50 rounded-xl border-2 border-dashed border-slate-300 hover:border-teal-400 transition-colors overflow-hidden">
+                        <canvas id="canvas-parent" class="absolute top-0 left-0 w-full h-full cursor-crosshair touch-none"></canvas>
+                        <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-10">
+                            <span class="text-4xl font-serif italic text-slate-400">Sign Here</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Date -->
+            <div class="flex flex-wrap justify-end items-center gap-2 text-slate-600 mt-8 pt-6 border-t border-slate-100">
+                <span class="font-serif">Date:</span>
+                <div class="bg-slate-100 px-4 py-2 rounded-lg font-mono text-slate-800 font-bold tracking-widest">
+                    2025 / <span id="auto-month"></span> / <span id="auto-day"></span>
+                </div>
+            </div>
+            
+        </div>
+    </main>
+
+    <!-- Floating Action Button (Submit) -->
+    <div class="fixed bottom-6 right-6 z-40">
+        <button id="submit-btn" onclick="submitToServer()" class="group relative flex items-center justify-center gap-3 bg-slate-900 text-white pl-6 pr-8 py-4 rounded-full shadow-2xl hover:bg-slate-800 active:scale-95 transition-all duration-300">
+            <div class="absolute inset-0 bg-teal-500 rounded-full opacity-0 group-hover:opacity-20 transition-opacity blur-lg"></div>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            <span class="font-sans font-bold tracking-wide">Submit Document</span>
+        </button>
+    </div>
+
+    <script>
+        // --- Signature Logic ---
+        window.pads = {};
+
+        function initSignaturePad(id, name) {
+            const canvas = document.getElementById(id);
+            const parent = canvas.parentElement;
+            
+            // High DPI Canvas setup
+            const signaturePad = new SignaturePad(canvas, {
+                minWidth: 1, // Slightly thicker for "Ink" feel
+                maxWidth: 3,
+                penColor: "#1e293b", // Slate-900 ink
+                throttle: 8, // Better performance on mobile
+                velocityFilterWeight: 0.6,
+            });
+            window.pads[name] = signaturePad;
+
+            function resizeCanvas() {
+                const ratio = Math.max(window.devicePixelRatio || 1, 1);
+                // Save signature, resize, restore
+                const data = signaturePad.toData();
+                canvas.width = parent.offsetWidth * ratio;
+                canvas.height = parent.offsetHeight * ratio;
+                canvas.getContext("2d").scale(ratio, ratio);
+                signaturePad.clear(); 
+                signaturePad.fromData(data);
+            }
+            
+            window.addEventListener("resize", resizeCanvas);
+            // Slight delay to ensure layout is computed
+            setTimeout(resizeCanvas, 200);
+        }
+
         async function submitToServer() {
             const studentName = document.getElementById('student-name').value.trim();
             const studentId = document.getElementById('student-id').value.trim();
@@ -16,84 +303,59 @@
             const sigStudent = window.pads['student'];
             const sigParent = window.pads['parent'];
 
-            // Basic Validation
             if (!studentName || !studentId || !parentName) {
-                showToast("請填寫所有欄位 (Please fill all fields)", "error");
+                showToast("⚠️ Missing Information", "Please fill in all name and ID fields.");
                 return;
             }
             if (sigStudent.isEmpty() || sigParent.isEmpty()) {
-                showToast("請完成簽名 (Please sign)", "error");
+                showToast("⚠️ Missing Signatures", "Both Student and Parent must sign.");
                 return;
             }
 
             const btn = document.getElementById('submit-btn');
-            const originalText = btn.innerHTML;
+            const originalContent = btn.innerHTML;
             btn.disabled = true;
-            // Add a spinner animation to the button
-            btn.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Uploading...`;
+            btn.innerHTML = `<svg class="animate-spin h-5 w-5 text-teal-400 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Processing...`;
 
             try {
-                // 1. Generate Image
                 const element = document.getElementById('paper-container');
                 
-                // Get the original scroll position to restore later if needed (though onclone handles most)
-                const originalWidth = element.offsetWidth;
-
+                // --- CAPTURE LOGIC (Restored from previous turn) ---
                 const canvas = await html2canvas(element, {
-                    scale: 2, // Standard print quality
+                    scale: 2,
                     useCORS: true,
-                    backgroundColor: '#ffffff', // Canvas background
+                    backgroundColor: '#ffffff',
                     logging: false,
-                    // width: 800, // Force canvas width (optional, but onclone styling is better)
-                    windowWidth: 1200, // Simulate a desktop window size
+                    windowWidth: 1200, // Force desktop width for consistency
                     onclone: (clonedDoc) => {
                         const clonedElement = clonedDoc.getElementById('paper-container');
                         if (clonedElement) {
-                            // 1. LOCK DIMENSIONS: Force desktop layout (A4-ish width)
-                            // This ensures the image looks the same whether signed on a phone or PC.
+                            // Normalize for PDF/Image output
                             clonedElement.style.width = '800px';
-                            clonedElement.style.minWidth = '800px';
                             clonedElement.style.maxWidth = '800px';
-                            clonedElement.style.height = 'auto';
                             clonedElement.style.margin = '0';
-                            clonedElement.style.padding = '40px'; // Standardize padding
-
-                            // 2. REMOVE ANIMATIONS & TRANSFORMS: Prevents "tilted" or "mid-animation" captures
-                            clonedElement.classList.remove('animate-paper-entry');
                             clonedElement.style.transform = 'none';
                             clonedElement.style.animation = 'none';
-                            clonedElement.style.transition = 'none';
-
-                            // 3. FORCE PURE WHITE & REMOVE STYLING ARTIFACTS
-                            clonedElement.style.backgroundColor = '#ffffff';
-                            clonedElement.style.backgroundImage = 'none';
                             clonedElement.style.boxShadow = 'none';
-                            clonedElement.style.border = '1px solid #000'; // Add simple border for scanned look
-                            clonedElement.style.borderRadius = '0';
+                            clonedElement.style.border = '2px solid #000';
                             
-                            // 4. Ensure all text is black and crisp
-                            clonedElement.style.color = '#000000';
-                            
-                            // Fix flex wrapping issues on mobile-simulated clones
-                            // Find specific flex containers if necessary, but fixed width usually solves it.
+                            // Flatten inputs
+                            clonedDoc.querySelectorAll('input').forEach(input => {
+                                input.style.background = 'white';
+                                input.style.border = 'none';
+                                input.style.borderBottom = '1px solid #000';
+                                input.style.color = 'black';
+                                input.style.padding = '5px 0';
+                                input.style.height = 'auto';
+                            });
+                            // Hide "Clear" buttons in print
+                             clonedDoc.querySelectorAll('button').forEach(b => b.style.display = 'none');
                         }
-                        
-                        // Force inputs to look like plain text
-                        const inputs = clonedDoc.querySelectorAll('input');
-                        inputs.forEach(input => {
-                            input.style.backgroundColor = '#ffffff'; // Force white background on inputs too
-                            input.style.border = 'none';
-                            input.style.borderBottom = '1px solid #000';
-                            input.style.color = '#000000';
-                            input.style.borderRadius = '0';
-                            input.style.boxShadow = 'none';
-                        });
                     }
                 });
 
                 const base64Image = canvas.toDataURL("image/png");
 
-                // 2. Send to Server (Filename logic is now handled SECURELY on server)
                 const response = await fetch('/api/upload', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -105,292 +367,47 @@
                 });
 
                 if (response.ok) {
-                    showToast("Uploaded Successfully!", "success");
-                    // clearPad('student'); clearPad('parent'); // Optional clear
+                    showToast("✅ Success", "Document uploaded securely.");
+                    // Optional: Redirect or disable form
                 } else {
-                    const errText = await response.text();
-                    throw new Error(errText || 'Upload failed');
+                    throw new Error('Server upload failed');
                 }
 
             } catch (err) {
                 console.error(err);
-                showToast("Upload Failed: " + err.message, "error");
+                showToast("❌ Error", "Upload failed. Please try again.");
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = originalText;
+                btn.innerHTML = originalContent;
             }
         }
-    </script>
 
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700&display=swap');
-        body { 
-            font-family: 'Noto Serif TC', serif; 
-            background-color: #f0f2f5;
-            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
-            background-size: 32px 32px;
-            overflow-x: hidden; /* Prevent horizontal scroll during animation */
-        }
-        
-        .signature-area { 
-            touch-action: none; 
-            user-select: none;
-            transition: all 0.3s ease;
-            background-color: #fff;
-            /* Subtle dot grid for signature area guide */
-            background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
-            background-size: 20px 20px;
-        }
-        .signature-area:hover, .signature-area:active {
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            border-color: #3b82f6;
-        }
-        
-        /* Smooth transitions for inputs with larger touch targets */
-        .input-active {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            background: transparent;
-            padding-top: 0.5rem;
-            padding-bottom: 0.5rem;
-        }
-        .input-active:focus { 
-            background-color: rgba(239, 246, 255, 0.8); 
-            border-color: #2563eb; 
-            border-radius: 4px;
-            padding-left: 0.5rem;
-            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
-        }
-
-        /* Realistic Paper Settle Animation */
-        @keyframes paperSettle {
-            0% { 
-                opacity: 0; 
-                transform: translateY(100px) scale(0.95) rotate(-2deg); 
-            }
-            60% { 
-                opacity: 1; 
-                transform: translateY(-10px) scale(1.01) rotate(1deg); 
-            }
-            80% { 
-                transform: translateY(5px) scale(0.99) rotate(-0.5deg); 
-            }
-            100% { 
-                opacity: 1; 
-                transform: translateY(0) scale(1) rotate(0); 
-            }
-        }
-        
-        .animate-paper-entry {
-            animation: paperSettle 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-            /* Deep, layered shadow for lifting effect */
-            box-shadow: 
-                0 1px 2px rgba(0,0,0,0.05), 
-                0 10px 20px rgba(0,0,0,0.05), 
-                0 20px 40px rgba(0,0,0,0.05);
-            transform-origin: center top;
-        }
-
-        /* Elegant Toast Animation */
-        @keyframes toastSlide {
-            0% { transform: translateY(-100%) scale(0.9); opacity: 0; }
-            100% { transform: translateY(0) scale(1); opacity: 1; }
-        }
-        .toast { 
-            animation: toastSlide 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-            backdrop-filter: blur(8px);
-        }
-
-        /* Interactive Elements */
-        .interactive-hover {
-            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        .interactive-hover:active {
-            transform: scale(0.92);
-        }
-        
-        /* Custom Scrollbar for better aesthetics */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-    </style>
-</head>
-<body class="min-h-screen p-4 flex justify-center items-start selection:bg-blue-100 selection:text-blue-900">
-
-    <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2"></div>
-
-    <!-- Paper Container with Entrance Animation -->
-    <div id="paper-container" class="animate-paper-entry w-full max-w-[800px] bg-[#fffdfa] p-8 md:p-14 relative transition-all duration-300 mb-20 border border-gray-100">
-        <div class="flex items-center justify-center mb-8">
-            <h1 class="text-2xl md:text-3xl font-bold text-gray-900 tracking-wide border-b-2 border-gray-900 pb-2">金銀島旅遊 [出國證件自帶切結書]</h1>
-        </div>
-        
-        <div class="space-y-6 text-lg text-gray-800 leading-relaxed">
-            <div class="flex flex-col md:flex-row md:items-center gap-2">
-                <span class="font-bold min-w-[60px]">學校：</span>
-                <span class="border-b-2 border-gray-800 flex-grow pb-1">康橋國際學校 林口校區</span>
-            </div>
-            
-            <!-- FIXED LAYOUT: Better wrapping for small screens -->
-            <div class="flex flex-wrap md:flex-nowrap gap-4">
-                <div class="flex flex-grow items-end gap-2 w-full md:w-auto">
-                    <span class="font-bold whitespace-nowrap">學生姓名：</span>
-                    <input id="student-name" type="text" maxlength="20" required class="input-active w-full border-b-2 border-gray-800 outline-none px-2 py-1 text-xl transition-colors rounded-t" placeholder="姓名 (Name)">
-                </div>
-                <div class="flex flex-grow items-end gap-2 w-full md:w-auto">
-                    <span class="font-bold whitespace-nowrap">學號：</span>
-                    <input id="student-id" type="text" maxlength="15" required class="input-active w-full border-b-2 border-gray-800 outline-none px-2 py-1 text-xl transition-colors rounded-t" placeholder="Student ID">
-                </div>
-            </div>
-
-            <div class="flex flex-wrap items-end gap-2">
-                <span class="font-bold">立書同意人或家長</span>
-                <input id="parent-name" type="text" maxlength="20" required class="input-active flex-grow min-w-[200px] border-b-2 border-gray-800 outline-none px-2 py-1 text-xl transition-colors rounded-t" placeholder="家長姓名 (Parent Name)">
-                <span>先生/小姐 (以下簡稱甲方)</span>
-            </div>
-
-            <div class="pl-0 md:pl-2 space-y-4 mt-6">
-                <p>茲參加由金銀島旅行社（以下簡稱乙方）所安排</p>
-                <p>於中華民國 114 年 1 月 11 日出發</p>
-                <p>團名：114 學年度 11 年級修業旅行活動</p>
-                
-                <p class="font-bold mt-4">甲方願意自行攜帶個人：</p>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pl-4">
-                    <label class="interactive-hover flex items-center gap-3 cursor-pointer p-2 rounded hover:bg-blue-50">
-                        <input type="checkbox" class="w-6 h-6 border-2 border-black accent-black" checked>
-                        <span>有效護照正本</span>
-                    </label>
-                    <label class="interactive-hover flex items-center gap-3 cursor-pointer p-2 rounded hover:bg-blue-50">
-                        <input type="checkbox" class="w-6 h-6 border-2 border-black accent-black">
-                        <span>居留證</span>
-                    </label>
-                    <label class="interactive-hover flex items-center gap-3 cursor-pointer p-2 rounded hover:bg-blue-50">
-                        <input type="checkbox" class="w-6 h-6 border-2 border-black accent-black">
-                        <span>役男出國許可證明</span>
-                    </label>
-                    <label class="interactive-hover flex items-center gap-3 cursor-pointer p-2 rounded hover:bg-blue-50">
-                        <input type="checkbox" class="w-6 h-6 border-2 border-black accent-black">
-                        <span>有效簽證</span>
-                    </label>
-                </div>
-
-                <p class="text-justify mt-4 text-base">
-                    前往本次活動指定地點報到，與團體會合辦理登機手續，若於出發前後因護照或簽證的問題，所衍生致影響旅客權益受損之情事時，一切責任及費用損失概由團員自行負責，若因此發生旅遊糾紛時，甲方願意放棄相關法律追訴、抗辯之權利，特此證明。
-                </p>
-            </div>
-
-            <div class="mt-8 grid grid-cols-1 gap-8">
-                <div class="relative group">
-                    <div class="flex justify-between items-end mb-2">
-                        <span class="font-bold text-lg text-red-600">* 本人 (立切結書人) 簽章：</span>
-                        <button type="button" onclick="clearPad('student')" data-html2canvas-ignore class="interactive-hover text-sm text-red-500 font-bold border border-red-200 bg-red-50 px-4 py-2 rounded-lg hover:bg-red-100 hover:border-red-300 hover:shadow-sm">
-                            Clear Signature
-                        </button>
-                    </div>
-                    <div class="signature-area border-2 border-gray-800 rounded-lg bg-gray-50 h-40 w-full relative overflow-hidden hover:shadow-md transition-shadow duration-300">
-                        <canvas id="canvas-student" class="absolute top-0 left-0 w-full h-full cursor-crosshair"></canvas>
-                    </div>
-                </div>
-
-                <div class="relative group">
-                    <div class="flex justify-between items-end mb-2">
-                        <div>
-                            <span class="font-bold text-lg text-red-600">* 家長簽章：</span>
-                            <span class="text-sm text-gray-600">(未成年者需家長簽章)</span>
-                        </div>
-                        <button type="button" onclick="clearPad('parent')" data-html2canvas-ignore class="interactive-hover text-sm text-red-500 font-bold border border-red-200 bg-red-50 px-4 py-2 rounded-lg hover:bg-red-100 hover:border-red-300 hover:shadow-sm">
-                            Clear Signature
-                        </button>
-                    </div>
-                    <div class="signature-area border-2 border-gray-800 rounded-lg bg-gray-50 h-40 w-full relative overflow-hidden hover:shadow-md transition-shadow duration-300">
-                        <canvas id="canvas-parent" class="absolute top-0 left-0 w-full h-full cursor-crosshair"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <div class="mt-12 flex justify-end items-center gap-1 font-bold text-lg">
-                <p>金銀島旅行社 敬上</p>
-            </div>
-            
-            <div class="mt-4 flex flex-wrap justify-end items-center gap-2 text-lg">
-                <span>中華民國</span>
-                <input type="number" class="w-16 text-center border-b-2 border-black focus:outline-none bg-transparent" placeholder="114">
-                <span>年</span>
-                <input type="number" class="w-12 text-center border-b-2 border-black focus:outline-none bg-transparent" placeholder="月">
-                <span>月</span>
-                <input type="number" class="w-12 text-center border-b-2 border-black focus:outline-none bg-transparent" placeholder="日">
-                <span>日</span>
-            </div>
-            
-             <div class="mt-8 text-sm text-gray-600 border-t border-gray-300 pt-4 space-y-1">
-                <p class="font-bold text-black mb-2">請注意：</p>
-                <ol class="list-decimal pl-5 space-y-1">
-                    <li>簽證效期必需符合本次活動日期。</li>
-                    <li>護照效期必需比回國日多出六個月以上。</li>
-                    <li>若為軍職者，出國需經由所屬單位核准，並將核准章蓋於護照上。</li>
-                    <li>若為役男者，出國需經戶政單位兵役科核准，並將核准章蓋於護照上。</li>
-                </ol>
-            </div>
-        </div>
-    </div>
-
-    <!-- Submit Button with Active Scale Effect -->
-    <button id="submit-btn" onclick="submitToServer()" class="fixed bottom-6 right-6 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white px-6 py-4 rounded-full shadow-xl transition-all duration-200 flex items-center gap-3 z-50 font-bold text-lg">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-        </svg>
-        <span>Submit to Server</span>
-    </button>
-
-    <script>
-        // --- Signature Logic ---
-        window.pads = {};
-
-        function initSignaturePad(id, name) {
-            const canvas = document.getElementById(id);
-            const parent = canvas.parentElement;
-            const signaturePad = new SignaturePad(canvas, {
-                minWidth: 0.5, maxWidth: 2.5, penColor: "rgb(0, 0, 0)",
-                throttle: 0, minDistance: 0, velocityFilterWeight: 0.7,
-            });
-            window.pads[name] = signaturePad;
-
-            function resizeCanvas() {
-                const ratio = Math.max(window.devicePixelRatio || 1, 1);
-                const data = signaturePad.toData();
-                canvas.width = parent.offsetWidth * ratio;
-                canvas.height = parent.offsetHeight * ratio;
-                canvas.getContext("2d").scale(ratio, ratio);
-                signaturePad.clear(); signaturePad.fromData(data);
-            }
-            window.addEventListener("resize", resizeCanvas);
-            setTimeout(resizeCanvas, 100);
-        }
-
-        window.showToast = function(message, type = 'success') {
+        function showToast(title, message) {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
-            const colors = type === 'error' ? 'bg-red-500' : 'bg-green-600';
-            toast.className = `toast ${colors} text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 font-bold`;
-            toast.innerText = message;
+            toast.className = `toast-enter bg-slate-900/90 backdrop-blur-md text-white px-6 py-4 rounded-2xl shadow-2xl border border-white/10 flex flex-col`;
+            toast.innerHTML = `<span class="font-bold text-teal-400 text-sm mb-1">${title}</span><span class="text-sm text-gray-200">${message}</span>`;
+            
             container.appendChild(toast);
-            setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
+            setTimeout(() => { 
+                toast.style.opacity = '0'; 
+                toast.style.transform = 'translateY(-10px)';
+                toast.style.transition = 'all 0.3s ease';
+                setTimeout(() => toast.remove(), 300); 
+            }, 3000);
         }
 
-        window.clearPad = function(name) {
+        function clearPad(name) {
             if(window.pads[name]) window.pads[name].clear();
         }
 
         document.addEventListener('DOMContentLoaded', () => {
             initSignaturePad('canvas-student', 'student');
             initSignaturePad('canvas-parent', 'parent');
-            const today = new Date();
-            const inputs = document.querySelectorAll('input[type="number"]');
-            if(inputs.length >= 3) {
-                 inputs[1].value = today.getMonth() + 1;
-                 inputs[2].value = today.getDate();
-            }
+            
+            const now = new Date();
+            document.getElementById('auto-month').textContent = (now.getMonth() + 1).toString().padStart(2, '0');
+            document.getElementById('auto-day').textContent = now.getDate().toString().padStart(2, '0');
         });
     </script>
 </body>
