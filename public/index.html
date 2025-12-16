@@ -206,12 +206,20 @@
                 <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
                     <div class="flex justify-between items-center mb-4">
                         <span class="font-bold text-slate-800 flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full bg-red-500"></span>
+                            <span class="w-2 h-2 rounded-full bg-teal-500"></span>
                             Student Signature
                         </span>
-                        <button onclick="clearPad('student')" data-html2canvas-ignore class="text-xs font-bold text-red-500 hover:bg-red-50 px-3 py-1.5 rounded-lg transition-colors uppercase tracking-wider">Clear</button>
+                        <div class="flex gap-2">
+                            <button id="btn-erase-student" onclick="toggleEraser('student')" class="text-xs font-bold text-slate-500 border border-slate-200 hover:bg-slate-50 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                </svg>
+                                Eraser
+                            </button>
+                            <button onclick="clearPad('student')" data-html2canvas-ignore class="text-xs font-bold text-red-500 border border-red-200 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-colors uppercase tracking-wider">Clear</button>
+                        </div>
                     </div>
-                    <div class="relative w-full h-40 bg-slate-50 rounded-xl border-2 border-dashed border-slate-300 hover:border-teal-400 transition-colors overflow-hidden">
+                    <div class="relative w-full h-40 bg-white rounded-xl border border-slate-200 shadow-inner overflow-hidden hover:border-teal-400 transition-colors">
                         <canvas id="canvas-student" class="absolute top-0 left-0 w-full h-full cursor-crosshair touch-none"></canvas>
                         <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-10">
                             <span class="text-4xl font-serif italic text-slate-400">Sign Here</span>
@@ -224,14 +232,22 @@
                     <div class="flex justify-between items-center mb-4">
                         <div class="flex flex-col">
                             <span class="font-bold text-slate-800 flex items-center gap-2">
-                                <span class="w-2 h-2 rounded-full bg-red-500"></span>
+                                <span class="w-2 h-2 rounded-full bg-teal-500"></span>
                                 Parent Signature
                             </span>
                             <span class="text-xs text-slate-400 pl-4">Required for minors</span>
                         </div>
-                        <button onclick="clearPad('parent')" data-html2canvas-ignore class="text-xs font-bold text-red-500 hover:bg-red-50 px-3 py-1.5 rounded-lg transition-colors uppercase tracking-wider">Clear</button>
+                        <div class="flex gap-2 items-center">
+                            <button id="btn-erase-parent" onclick="toggleEraser('parent')" class="text-xs font-bold text-slate-500 border border-slate-200 hover:bg-slate-50 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                </svg>
+                                Eraser
+                            </button>
+                            <button onclick="clearPad('parent')" data-html2canvas-ignore class="text-xs font-bold text-red-500 border border-red-200 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-colors uppercase tracking-wider">Clear</button>
+                        </div>
                     </div>
-                    <div class="relative w-full h-40 bg-slate-50 rounded-xl border-2 border-dashed border-slate-300 hover:border-teal-400 transition-colors overflow-hidden">
+                    <div class="relative w-full h-40 bg-white rounded-xl border border-slate-200 shadow-inner overflow-hidden hover:border-teal-400 transition-colors">
                         <canvas id="canvas-parent" class="absolute top-0 left-0 w-full h-full cursor-crosshair touch-none"></canvas>
                         <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-10">
                             <span class="text-4xl font-serif italic text-slate-400">Sign Here</span>
@@ -263,26 +279,47 @@
     </div>
 
     <script>
-        // --- Signature Logic ---
+        // --- Advanced Signature Logic ---
         window.pads = {};
 
         function initSignaturePad(id, name) {
             const canvas = document.getElementById(id);
             const parent = canvas.parentElement;
             
-            // High DPI Canvas setup
+            // 1. High-Performance Configuration
+            // We use 'pointer' events to support S-Pen/Apple Pencil pressure and eraser buttons
             const signaturePad = new SignaturePad(canvas, {
-                minWidth: 1, // Slightly thicker for "Ink" feel
-                maxWidth: 3,
-                penColor: "#1e293b", // Slate-900 ink
-                throttle: 8, // Better performance on mobile
-                velocityFilterWeight: 0.6,
+                minWidth: 1.0, 
+                maxWidth: 4.0, // Wider dynamic range for pressure
+                penColor: "#1e293b",
+                throttle: 0, // Disable throttling for max smoothness (modern devices handle this fine)
+                minDistance: 0, // Capture every point for high fidelity
+                velocityFilterWeight: 0.2, // Smoother curves
             });
+            
+            // Store extra state for eraser toggle
+            signaturePad.isErasing = false;
             window.pads[name] = signaturePad;
 
+            // 2. Eraser Button Support (S-Pen / Surface Pen)
+            canvas.addEventListener('pointerdown', (e) => {
+                // e.button === 5 is standard for eraser buttons on many styluses
+                // e.buttons === 32 is also common
+                if (e.button === 5 || e.buttons === 32 || e.pointerType === 'pen' && e.button === -1) { 
+                    toggleEraser(name, true);
+                }
+            });
+            
+            canvas.addEventListener('pointerup', (e) => {
+                // If we were erasing with a button, switch back to pen on release
+                if (signaturePad.isErasing && (e.button === 5 || e.button === -1)) {
+                   toggleEraser(name, false); 
+                }
+            });
+
+            // 3. Retina/High-DPI Handling
             function resizeCanvas() {
                 const ratio = Math.max(window.devicePixelRatio || 1, 1);
-                // Save signature, resize, restore
                 const data = signaturePad.toData();
                 canvas.width = parent.offsetWidth * ratio;
                 canvas.height = parent.offsetHeight * ratio;
@@ -292,8 +329,24 @@
             }
             
             window.addEventListener("resize", resizeCanvas);
-            // Slight delay to ensure layout is computed
             setTimeout(resizeCanvas, 200);
+        }
+
+        window.toggleEraser = function(name, forceState = null) {
+            const pad = window.pads[name];
+            if (!pad) return;
+
+            const newState = forceState !== null ? forceState : !pad.isErasing;
+            pad.isErasing = newState;
+
+            if (pad.isErasing) {
+                pad.compositeOperation = 'destination-out';
+                // Visual feedback (optional)
+                document.getElementById(`btn-erase-${name}`)?.classList.add('bg-teal-100', 'text-teal-700', 'border-teal-300');
+            } else {
+                pad.compositeOperation = 'source-over';
+                document.getElementById(`btn-erase-${name}`)?.classList.remove('bg-teal-100', 'text-teal-700', 'border-teal-300');
+            }
         }
 
         async function submitToServer() {
