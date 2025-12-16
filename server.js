@@ -52,8 +52,11 @@ app.post('/api/upload', async (req, res) => {
     try {
         if (useCloudinary) {
             // --- CLOUD STORAGE (Production) ---
+            // Create a date-based subfolder (e.g., "kcis-signatures/2023-10-27")
+            const today = new Date().toISOString().split('T')[0];
+            
             const uploadResult = await cloudinary.uploader.upload(image, {
-                folder: "signature-app",
+                folder: `kcis-signatures/${today}`,
                 public_id: finalFilename,
                 resource_type: "image"
             });
