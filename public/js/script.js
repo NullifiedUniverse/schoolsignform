@@ -198,11 +198,12 @@ async function submitToServer() {
             const txCenter = viewportCenterX - btnCenterX;
             const tyCenter = viewportCenterY - btnCenterY;
 
+            // ... existing animation logic ...
             // 2. Animate Button to Center (Morph to Toast)
             btn.style.setProperty('--tx-center', `${txCenter}px`);
             btn.style.setProperty('--ty-center', `${tyCenter}px`);
             btn.classList.add('success-journey');
-            btn.innerHTML = `<span class="flex items-center gap-2 font-bold text-lg">✨ Success!</span>`; // Simple toast text
+            btn.innerHTML = `<span class="flex items-center gap-2 font-bold text-xl">✨ Success!</span>`; // Larger text
 
             // 3. Sequence: Return -> Form Reappear -> Reload
             setTimeout(() => {
@@ -228,7 +229,7 @@ async function submitToServer() {
 
                 }, 800); // Wait for button to settle back
 
-            }, 2500); // Hold success message
+            }, 3500); // Hold success message longer
 
         } else {
             throw new Error('Server upload failed');
@@ -243,10 +244,12 @@ async function submitToServer() {
         element.classList.remove('magic-morph');
         element.classList.add('magic-morph-reverse');
         
-    } finally {
+        // Reset Button ONLY on error
         btn.disabled = false;
         btn.innerHTML = originalContent;
     }
+    // No finally block to prevent button re-enabling during success animation
+}
 }
 
 function showToast(title, message) {
