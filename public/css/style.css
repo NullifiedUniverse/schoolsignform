@@ -40,7 +40,6 @@ canvas { touch-action: none; }
     100% { opacity: 1; transform: translateY(0); filter: blur(0); }
 }
 
-/* Consistent easing for entry */
 .stagger-1 { animation: fadeInSlideUp 0.8s var(--ease-out-quint) 0.1s backwards; }
 .stagger-2 { animation: fadeInSlideUp 0.8s var(--ease-out-quint) 0.15s backwards; }
 .stagger-3 { animation: fadeInSlideUp 0.8s var(--ease-out-quint) 0.2s backwards; }
@@ -110,36 +109,30 @@ canvas { touch-action: none; }
 /* --- Magic Lamp / Genie Morph --- */
 .magic-morph {
     transform-origin: center center;
-    /* Custom cubic bezier for "vacuum" feel: Start slow, snap fast */
-    animation: genieSuck 0.85s cubic-bezier(0.7, 0, 0.2, 1) forwards;
+    /* Accelerating curve for vacuum feel */
+    animation: genieSuck 0.7s var(--ease-in-quart) forwards; 
     pointer-events: none;
     will-change: transform, opacity, filter, border-radius, background-color;
 }
 
 @keyframes genieSuck {
     0% {
-        transform: translate(0, 0) scale(1) rotate(0deg);
+        transform: translate(0, 0) scale(1);
         opacity: 1; filter: blur(0);
         border-radius: 1.5rem;
         background-color: #f1f5f9;
     }
-    20% {
-        /* Anticipation: Squash down before launching */
-        transform: translate(0, 20px) scale(1.1, 0.95);
+    30% {
+        /* Anticipation: Pull back slightly */
+        transform: translate(0, -30px) scale(0.95, 1.05); 
         opacity: 1;
         border-radius: 2rem;
     }
-    55% {
-        /* COMPLEX STRETCH: Extreme elongation into the "funnel" */
-        transform: translate(calc(var(--tx) * 0.45), calc(var(--ty) * 0.45)) scale(0.2, 1.8) rotate(15deg);
-        opacity: 0.9;
-        border-radius: 8rem; /* Almost fluid-like */
-    }
     100% {
-        /* Singularity at button */
-        transform: translate(var(--tx), var(--ty)) scale(0) rotate(45deg);
+        /* Snap into button */
+        transform: translate(var(--tx), var(--ty)) scale(0.05);
         opacity: 0; 
-        filter: blur(10px);
+        filter: blur(8px); /* Reduced blur for mobile perf */
         border-radius: 50%;
         background-color: #0f172a; 
     }
@@ -152,7 +145,7 @@ canvas { touch-action: none; }
 @keyframes genieAppear {
     0% {
         transform: translate(var(--tx), var(--ty)) scale(0.05);
-        opacity: 0; filter: blur(20px);
+        opacity: 0; filter: blur(8px);
     }
     100% {
         transform: translate(0, 0) scale(1);
@@ -193,8 +186,8 @@ canvas { touch-action: none; }
     }
     100% {
         transform: translate(var(--tx-center), var(--ty-center)) scale(1.2);
-        width: 320px; 
-        height: 70px; 
+        width: min(90vw, 380px); /* Dynamic sizing for mobile */
+        height: 72px; 
         border-radius: 1rem; 
         background-color: #0f766e;
         box-shadow: 0 25px 60px -12px rgba(15, 118, 110, 0.6);
@@ -215,8 +208,8 @@ canvas { touch-action: none; }
 @keyframes successReturn {
     0% {
         transform: translate(var(--tx-center), var(--ty-center)) scale(1.2);
-        width: 320px;
-        height: 70px;
+        width: min(90vw, 380px); /* Match end state of journey */
+        height: 72px;
         border-radius: 1rem;
         background-color: #0f766e;
     }
