@@ -100,7 +100,7 @@ canvas { touch-action: none; }
 }
 .checkbox-card input:checked + div { color: #0f766e; font-weight: 600; }
 
-/* --- Genie Morph Effect --- */
+/* --- Polished Genie Morph --- */
 .magic-morph {
     animation: genieMorph 0.8s cubic-bezier(0.65, 0, 0.35, 1) forwards;
     pointer-events: none;
@@ -119,13 +119,13 @@ canvas { touch-action: none; }
         transform: translate(calc(var(--tx) * 0.1), calc(var(--ty) * 0.1)) scale(0.92);
         opacity: 1;
         border-radius: 4rem; 
-        filter: blur(0.5px);
+        filter: blur(2px); /* Increased intermediate blur */
     }
     100% {
         transform: translate(var(--tx), var(--ty)) scale(0.05);
         opacity: 0;
         border-radius: 50%;
-        filter: blur(8px);
+        filter: blur(15px); /* Stronger final blur */
     }
 }
 
@@ -156,20 +156,20 @@ canvas { touch-action: none; }
     20% { 
         transform: translate(calc(var(--tx) * 0.1), calc(var(--ty) * 0.1)) scale(0.98); 
         border-radius: 3rem;
-        filter: blur(0.5px);
+        filter: blur(2px); /* Subtle blur for movement */
         opacity: 1;
     }
     40% {
         transform: translate(calc(var(--tx) * 0.05), calc(var(--ty) * 0.05)) scale(1.02, 0.95);
         border-radius: 2.5rem;
-        filter: blur(0);
-        box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.3), 0 0 30px rgba(239, 68, 68, 0.6);
+        filter: blur(3px); /* Stronger blur at impact */
+        box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.3), 0 0 40px rgba(239, 68, 68, 0.8); /* Stronger glow */
         opacity: 1;
     }
     60% {
         transform: translate(calc(var(--tx) * -0.01), calc(var(--ty) * -0.01)) scale(0.99, 1.01);
         box-shadow: none;
-        filter: blur(0);
+        filter: blur(1px); /* Fading blur */
         opacity: 1;
     }
     100% { 
