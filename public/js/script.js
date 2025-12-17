@@ -13,9 +13,9 @@ function initSignaturePad(id, name) {
         minWidth: 1.0, 
         maxWidth: 4.0, 
         penColor: "#1e293b",
-        throttle: 8, // ~120Hz cap. 0 was too aggressive. 8ms balances smoothness vs performance.
-        minDistance: 3, // Ignore tiny micro-movements to reduce noise and rendering load
-        velocityFilterWeight: 0.7, // Increased from 0.2 for much smoother, less "jittery" lines
+        throttle: 16, // Best Practice: ~60Hz limit. Balances smoothness with device battery/cpu.
+        minDistance: 5, // Best Practice: Capture fewer points for cleaner data and faster rendering.
+        velocityFilterWeight: 0.7, 
     });
     
     // Store extra state for eraser toggle
@@ -184,7 +184,11 @@ async function submitToServer() {
 
         if (response.ok) {
             showToast("✅ Success", "Document uploaded securely.");
-            // Keep form hidden (morphed) to indicate finality
+            // 3. Kick User / Reset Session
+            setTimeout(() => {
+                showToast("👋 Goodbye", "Resetting form for next user...");
+                setTimeout(() => window.location.reload(), 1500);
+            }, 1000);
         } else {
             throw new Error('Server upload failed');
         }
