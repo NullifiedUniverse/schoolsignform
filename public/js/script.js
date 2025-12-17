@@ -250,34 +250,56 @@ async function submitToServer() {
         });
 
         if (response.ok) {
-            // --- SUCCESS JOURNEY ---
-            vibrate([50, 100, 50]); // Success Haptics
+            // --- SUCCESS ANIMATION SEQUENCE ---
+            vibrate([50, 100, 50]); 
 
-            // Calculate Center Trajectory
+            // 1. Measure & Setup Geometry
             const finalBtnRect = btn.getBoundingClientRect();
-            const txCenter = (window.innerWidth / 2) - (finalBtnRect.left + finalBtnRect.width/2);
-            const tyCenter = (window.innerHeight / 2) - (finalBtnRect.top + finalBtnRect.height/2);
+            const viewportCenterX = window.innerWidth / 2;
+            const viewportCenterY = window.innerHeight / 2;
+            const btnCenterX = finalBtnRect.left + finalBtnRect.width / 2;
+            const btnCenterY = finalBtnRect.top + finalBtnRect.height / 2;
+            
+            const txCenter = viewportCenterX - btnCenterX;
+            const tyCenter = viewportCenterY - btnCenterY;
 
+            // Capture initial button dimensions for smooth tweening
+            btn.style.setProperty('--btn-w', `${finalBtnRect.width}px`);
+            btn.style.setProperty('--btn-h', `${finalBtnRect.height}px`);
             btn.style.setProperty('--tx-center', `${txCenter}px`);
             btn.style.setProperty('--ty-center', `${tyCenter}px`);
-            btn.classList.add('success-journey');
-            btn.innerHTML = `<span class="flex items-center gap-2 font-bold text-xl">✨ Success!</span>`;
 
-            // Sequence
+            // 2. Trigger Journey
+            btn.classList.add('success-journey');
+            
+            // Swap text after a tiny delay so the expansion hides the jump
             setTimeout(() => {
-                // Return
+                btn.innerHTML = `<span class="flex items-center gap-2 font-bold text-xl whitespace-nowrap">✨ Success!</span>`;
+            }, 100);
+
+            // 3. Sequence
+            setTimeout(() => {
+                // A. Glide Back
                 btn.classList.remove('success-journey');
                 btn.classList.add('success-return');
                 
-                setTimeout(() => { btn.innerHTML = originalContent; }, 200);
+                // Swap text back halfway through return
+                setTimeout(() => {
+                    btn.innerHTML = originalContent;
+                }, 300); 
 
                 setTimeout(() => {
-                    // Form Reappear
+                    // B. Form Reappears
                     element.classList.remove('magic-morph');
                     element.classList.add('magic-morph-reverse');
 
-                    setTimeout(() => { window.location.reload(); }, 1200); 
-                }, 800);
+                    setTimeout(() => {
+                        // C. Hard Reset
+                        window.location.reload();
+                    }, 1200); 
+
+                }, 800); 
+
             }, 3500); 
 
         } else {
