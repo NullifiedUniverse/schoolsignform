@@ -1,8 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Serif+TC:wght@400;700&display=swap');
 
 :root {
-    --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Bouncy Entry */
-    --ease-squish: cubic-bezier(0.5, -0.6, 0.1, 1.6); /* For recoil effects */
+    --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    --ease-squish: cubic-bezier(0.5, -0.6, 0.1, 1.6);
     --ease-smooth: cubic-bezier(0.4, 0.0, 0.2, 1);
 }
 
@@ -33,7 +33,7 @@ body::before {
 
 canvas { touch-action: none; }
 
-/* --- Physics-Based Entry --- */
+/* --- Optimized Staggered Entry --- */
 @keyframes springUp {
     0% { opacity: 0; transform: translateY(60px) scale(0.9); filter: blur(10px); }
     100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
@@ -58,7 +58,7 @@ canvas { touch-action: none; }
 
 .input-field {
     width: 100%;
-    background: #f8fafc;
+    background: #f1f5f9; /* Toned down from f8fafc */
     border: 1px solid #e2e8f0;
     border-radius: 0.75rem;
     padding: 1rem 1rem 0.5rem;
@@ -70,7 +70,7 @@ canvas { touch-action: none; }
 }
 
 .input-field:focus {
-    background: #ffffff;
+    background: #ffffff; /* White only on focus */
     border-color: #0f766e;
     box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.1), 0 4px 12px rgba(0,0,0,0.05);
     transform: translateY(-2px);
@@ -91,15 +91,16 @@ canvas { touch-action: none; }
 .input-field:focus + .input-label { color: #0f766e; }
 
 .checkbox-card {
-    background: white; border: 1px solid #e2e8f0; border-radius: 0.75rem; transition: all 0.2s ease;
+    background: #f8fafc; /* Toned down from white */
+    border: 1px solid #e2e8f0; border-radius: 0.75rem; transition: all 0.2s ease;
 }
 .checkbox-card:hover {
     border-color: #0f766e; background: #f0fdfa; transform: translateY(-1px);
-    box-shadow: 0 4px 12px -2px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 12px -2px rgba(15, 118, 110, 0.08); /* Tinted shadow */
 }
 .checkbox-card input:checked + div { color: #0f766e; font-weight: 600; }
 
-/* --- Polished Genie Morph --- */
+/* --- Genie Morph Effect --- */
 .magic-morph {
     animation: genieMorph 0.8s cubic-bezier(0.65, 0, 0.35, 1) forwards;
     pointer-events: none;
@@ -115,15 +116,12 @@ canvas { touch-action: none; }
         filter: blur(0);
     }
     40% {
-        /* Shape Morph Phase - Rounding & Slight Shrink */
-        /* Less directional pull, more blob-like morph */
         transform: translate(calc(var(--tx) * 0.1), calc(var(--ty) * 0.1)) scale(0.92);
         opacity: 1;
         border-radius: 4rem; 
         filter: blur(0.5px);
     }
     100% {
-        /* Velocity Phase - Snap to button */
         transform: translate(var(--tx), var(--ty)) scale(0.05);
         opacity: 0;
         border-radius: 50%;
@@ -146,11 +144,46 @@ canvas { touch-action: none; }
     }
 }
 
+/* --- Fake-out / Bounce Back --- */
+.magic-reject {
+    animation: genieBounceBack 1s cubic-bezier(0.5, -0.2, 0.1, 1.2) forwards;
+    transform-origin: center center;
+    will-change: transform;
+}
+
+@keyframes genieBounceBack {
+    0% { transform: translate(0,0) scale(1); border-radius: 1.5rem; filter: blur(0); opacity: 1; }
+    20% { 
+        transform: translate(calc(var(--tx) * 0.1), calc(var(--ty) * 0.1)) scale(0.98); 
+        border-radius: 3rem;
+        filter: blur(0.5px);
+        opacity: 1;
+    }
+    40% {
+        transform: translate(calc(var(--tx) * 0.05), calc(var(--ty) * 0.05)) scale(1.02, 0.95);
+        border-radius: 2.5rem;
+        filter: blur(0);
+        box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.3), 0 0 30px rgba(239, 68, 68, 0.6);
+        opacity: 1;
+    }
+    60% {
+        transform: translate(calc(var(--tx) * -0.01), calc(var(--ty) * -0.01)) scale(0.99, 1.01);
+        box-shadow: none;
+        filter: blur(0);
+        opacity: 1;
+    }
+    100% { 
+        transform: translate(0,0) scale(1); border-radius: 1.5rem; filter: blur(0); opacity: 1;
+        box-shadow: 0 10px 40px -10px rgba(0,0,0,0.1);
+    }
+}
+
 /* --- Success Journey --- */
 .success-journey {
     animation: successExpand 0.9s var(--ease-spring) forwards;
     z-index: 50;
     pointer-events: none;
+    will-change: transform, width, height, border-radius;
 }
 
 @keyframes successExpand {
@@ -162,7 +195,7 @@ canvas { touch-action: none; }
     }
     100% {
         transform: translate(var(--tx-center), var(--ty-center));
-        width: min(90vw, 500px); /* Larger toast */
+        width: min(90vw, 500px);
         height: 72px;
         border-radius: 1rem;
         background-color: #0f766e;
@@ -172,6 +205,7 @@ canvas { touch-action: none; }
 
 .success-return {
     animation: successShrink 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    will-change: transform, width, height, border-radius;
 }
 
 @keyframes successShrink {
@@ -188,42 +222,6 @@ canvas { touch-action: none; }
         height: var(--btn-h);
         border-radius: 9999px;
         background-color: #1e293b; 
-    }
-}
-
-/* --- Fake-out / Bounce Back (Failure Animation) --- */
-.magic-reject {
-    animation: genieBounceBack 1s cubic-bezier(0.5, -0.2, 0.1, 1.2) forwards; /* Softer bounce ease */
-    transform-origin: center center;
-}
-
-@keyframes genieBounceBack {
-    0% { transform: translate(0,0) scale(1); border-radius: 1.5rem; filter: blur(0); opacity: 1; }
-    20% { 
-        /* Start morphing towards destination... */
-        transform: translate(calc(var(--tx) * 0.1), calc(var(--ty) * 0.1)) scale(0.98); 
-        border-radius: 3rem;
-        filter: blur(0.5px);
-        opacity: 1;
-    }
-    40% {
-        /* HIT THE WALL - Compression and Red Alert */
-        transform: translate(calc(var(--tx) * 0.05), calc(var(--ty) * 0.05)) scale(1.02, 0.95); /* Softer Squish */
-        border-radius: 2.5rem;
-        filter: blur(0);
-        box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.3), 0 0 30px rgba(239, 68, 68, 0.6); /* Clearer Red Glow */
-        opacity: 1;
-    }
-    60% {
-        /* Spring Back - Overshoot */
-        transform: translate(calc(var(--tx) * -0.01), calc(var(--ty) * -0.01)) scale(0.99, 1.01);
-        box-shadow: none;
-        filter: blur(0);
-        opacity: 1;
-    }
-    100% { 
-        transform: translate(0,0) scale(1); border-radius: 1.5rem; filter: blur(0); opacity: 1;
-        box-shadow: 0 10px 40px -10px rgba(0,0,0,0.1);
     }
 }
 
