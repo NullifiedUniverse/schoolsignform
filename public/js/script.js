@@ -118,11 +118,13 @@ async function submitToServer() {
                         input.style.borderBottom = '2px solid #333';
                         input.style.borderRadius = '0';
                         input.style.color = '#000';
-                        input.style.padding = '20px 0 8px 0'; // Adjusted padding
-                        input.style.lineHeight = '1.5'; // Fix line height
+                        input.style.padding = '28px 0 12px 0'; // More top/bottom padding
+                        input.style.lineHeight = 'normal'; // Reset line height
+                        input.style.fontFamily = 'Arial, sans-serif'; // Standard font for metrics
                         input.style.height = 'auto';
-                        input.style.minHeight = '50px'; // Ensure sufficient height
+                        input.style.minHeight = '60px'; // Increase min-height
                         input.style.boxSizing = 'border-box';
+                        input.style.overflow = 'visible';
                         input.style.fontSize = '16px';
                         input.style.width = '100%';
                         input.style.boxShadow = 'none';
