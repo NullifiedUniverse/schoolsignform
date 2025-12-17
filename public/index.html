@@ -17,7 +17,7 @@
                         sans: ['"Inter"', 'system-ui', 'sans-serif'],
                     },
                     colors: {
-                        paper: '#fdfbf7', // Warm paper white
+                        paper: '#f1f5f9', // Darker paper for contrast
                         ink: '#1e293b',   // Deep slate for text
                         accent: '#0f766e', // Teal for branding
                     },
@@ -40,7 +40,7 @@
     <main id="paper-container" class="animate-bento w-full max-w-[850px] bg-paper rounded-3xl shadow-lift p-6 md:p-12 relative border border-white/50 backdrop-blur-sm">
         
         <!-- Header -->
-        <header class="text-center mb-10 border-b-2 border-slate-100 pb-8">
+        <header class="text-center mb-10 border-b-2 border-slate-100 pb-8 stagger-1">
             <div class="inline-block px-4 py-1 rounded-full bg-teal-50 text-teal-700 text-sm font-bold tracking-widest mb-3 font-sans uppercase">Official Document</div>
             <h1 class="text-3xl md:text-4xl font-bold text-slate-800 mb-2">出國證件自帶切結書</h1>
             <p class="text-slate-500 text-lg">Travel Document Responsibility Agreement</p>
@@ -48,7 +48,7 @@
 
         <div class="space-y-8">
             <!-- School Info (Static) -->
-            <div class="flex items-center gap-4 text-slate-600 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+            <div class="flex items-center gap-4 text-slate-600 bg-slate-50 p-4 rounded-2xl border border-slate-100 stagger-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                 </svg>
@@ -59,7 +59,7 @@
             </div>
 
             <!-- Student Info Section -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 stagger-3">
                 <div class="input-group">
                     <input type="text" id="student-name" class="input-field pt-6" placeholder=" " required maxlength="20">
                     <label for="student-name" class="input-label">Student Name (學生姓名)</label>
@@ -71,14 +71,14 @@
             </div>
 
             <!-- Parent Info -->
-            <div class="input-group">
+            <div class="input-group stagger-4">
                 <input type="text" id="parent-name" class="input-field pt-6" placeholder=" " required maxlength="20">
                 <label for="parent-name" class="input-label">Parent / Guardian Name (家長姓名)</label>
                 <div class="absolute right-4 top-4 text-slate-400 text-sm pointer-events-none hidden md:block">先生/小姐 (甲方)</div>
             </div>
 
             <!-- Context Block -->
-            <div class="prose prose-slate max-w-none bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+            <div class="prose prose-slate max-w-none bg-white p-6 rounded-2xl border border-slate-100 shadow-sm stagger-5">
                 <p class="mb-4">
                     茲參加由 <strong class="text-teal-700">金銀島旅行社</strong> 安排於 
                     <span class="font-mono bg-slate-100 px-2 py-0.5 rounded text-sm mx-1">2025/01/11</span> 
@@ -111,7 +111,7 @@
             </div>
 
             <!-- Signature Section -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8 stagger-6">
                 <!-- Student Sig -->
                 <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
                     <div class="flex justify-between items-center mb-4">

@@ -1,5 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Serif+TC:wght@400;700&display=swap');
 
+:root {
+    --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 body {
     background-color: #0f172a; /* Dark Grey / Slate 900 */
     background-image: 
@@ -7,7 +11,7 @@ body {
         radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.15) 0px, transparent 50%);
     background-attachment: fixed;
     -webkit-font-smoothing: antialiased;
-    position: relative; /* For pseudo-element positioning */
+    position: relative;
 }
 
 /* Subtle System Watermark */
@@ -18,8 +22,8 @@ body::before {
     width: 100%;
     height: 100%;
     pointer-events: none;
-    z-index: 0; /* Behind content, above background */
-    opacity: 0.1; /* Adjusted for dark mode visibility */
+    z-index: 0;
+    opacity: 0.1;
     background-image: url("data:image/svg+xml,%3Csvg width='300' height='300' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='50%25' y='50%25' font-family='Inter, sans-serif' font-weight='700' font-size='20' fill='%23ffffff' opacity='0.3' transform='rotate(-45 150 150)' text-anchor='middle' dominant-baseline='middle'%3ENullifiedGalaxy%3C/text%3E%3C/svg%3E");
     background-repeat: repeat;
     mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
@@ -28,18 +32,25 @@ body::before {
 }
 
 canvas {
-    touch-action: none; /* Critical for high-performance pointer events */
+    touch-action: none;
 }
 
-/* --- Animations --- */
-@keyframes bentoBounce {
-    0% { opacity: 0; transform: scale(0.95) translateY(20px); }
-    60% { opacity: 1; transform: scale(1.02) translateY(-5px); }
-    100% { transform: scale(1) translateY(0); }
+/* --- Staggered Entry Animations --- */
+@keyframes fadeInSlideUp {
+    0% { opacity: 0; transform: translateY(20px); filter: blur(5px); }
+    100% { opacity: 1; transform: translateY(0); filter: blur(0); }
 }
 
+.stagger-1 { animation: fadeInSlideUp 0.8s var(--ease-spring) 0.1s backwards; }
+.stagger-2 { animation: fadeInSlideUp 0.8s var(--ease-spring) 0.15s backwards; }
+.stagger-3 { animation: fadeInSlideUp 0.8s var(--ease-spring) 0.2s backwards; }
+.stagger-4 { animation: fadeInSlideUp 0.8s var(--ease-spring) 0.25s backwards; }
+.stagger-5 { animation: fadeInSlideUp 0.8s var(--ease-spring) 0.3s backwards; }
+.stagger-6 { animation: fadeInSlideUp 0.8s var(--ease-spring) 0.35s backwards; }
+
+/* --- Main Card Animation --- */
 .animate-bento {
-    animation: hyperReveal 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; /* Adjusted for stronger start */
+    animation: hyperReveal 1.2s var(--ease-spring) forwards;
     will-change: transform, opacity, filter;
     transform-origin: center top;
     backface-visibility: hidden;
@@ -48,7 +59,7 @@ canvas {
 @keyframes hyperReveal {
     0% {
         opacity: 0;
-        transform: scale(1.15) translateY(50px) rotateX(15deg); /* Stronger 3D entrance */
+        transform: scale(1.15) translateY(50px) rotateX(15deg);
         filter: blur(20px);
     }
     100% {
@@ -58,12 +69,73 @@ canvas {
     }
 }
 
+/* --- Form Elements & Micro-interactions --- */
+.input-group {
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.input-field {
+    width: 100%;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    padding: 1rem 1rem 0.5rem;
+    font-size: 1.1rem;
+    color: #334155;
+    transition: all 0.3s var(--ease-spring);
+    outline: none;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.input-field:focus {
+    background: #ffffff;
+    border-color: #0f766e;
+    box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.15);
+    transform: translateY(-2px);
+}
+
+.input-label {
+    position: absolute;
+    left: 1rem;
+    top: 0.35rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    pointer-events: none;
+    transition: all 0.3s var(--ease-spring);
+}
+
+.input-field:focus + .input-label {
+    color: #0f766e;
+    transform: scale(1.05);
+}
+
+/* Checkbox Styling */
+.checkbox-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    transition: all 0.2s ease;
+}
+.checkbox-card:hover {
+    border-color: #0f766e;
+    background: #f0fdfa;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px -2px rgba(0,0,0,0.05);
+}
+.checkbox-card input:checked + div {
+    color: #0f766e;
+    font-weight: 600;
+}
+
 /* --- Magic Lamp / Genie Morph Effect --- */
 .magic-morph {
-    /* Variables --tx and --ty will be set by JS */
     transform-origin: center center;
     animation: genieSuck 1.0s cubic-bezier(0.7, 0, 0.2, 1) forwards;
-    pointer-events: none; /* Prevent interaction while morphing */
+    pointer-events: none;
     will-change: transform, opacity, filter;
 }
 
@@ -72,10 +144,9 @@ canvas {
         transform: translate(0, 0) scale(1) rotate(0deg);
         opacity: 1;
         filter: blur(0);
-        border-radius: 1.5rem; /* Match rounded-3xl */
+        border-radius: 1.5rem;
     }
     40% {
-        /* Stretch anticipation before the suck */
         transform: translate(0, -20px) scale(1.02, 0.95); 
         opacity: 1;
     }
@@ -83,7 +154,7 @@ canvas {
         transform: translate(var(--tx), var(--ty)) scale(0.01) rotate(20deg);
         opacity: 0;
         filter: blur(30px);
-        border-radius: 50%; /* Morph to button shape */
+        border-radius: 50%;
     }
 }
 
@@ -117,26 +188,22 @@ canvas {
         border-color: rgba(255, 255, 255, 0.5);
     }
     30% {
-        /* Stronger movement towards button + Red Glow */
         transform: translate(calc(var(--tx) * 0.3), calc(var(--ty) * 0.3)) scale(0.95) rotate(-6deg);
         filter: brightness(0.9);
-        box-shadow: 0 0 40px rgba(239, 68, 68, 0.7); /* Red */
+        box-shadow: 0 0 40px rgba(239, 68, 68, 0.7);
         border-color: rgba(239, 68, 68, 0.9);
     }
     50% {
-        /* Violent Shake + White Flash */
         transform: translate(calc(var(--tx) * 0.3), calc(var(--ty) * 0.3)) scale(0.95) rotate(6deg);
-        box-shadow: 0 0 60px rgba(255, 255, 255, 0.9); /* White */
+        box-shadow: 0 0 60px rgba(255, 255, 255, 0.9);
         border-color: #ffffff;
     }
     70% {
-        /* Return swing + Green/Teal tint */
         transform: translate(calc(var(--tx) * 0.3), calc(var(--ty) * 0.3)) scale(0.95) rotate(-4deg);
-        box-shadow: 0 0 40px rgba(15, 118, 110, 0.7); /* Teal */
+        box-shadow: 0 0 40px rgba(15, 118, 110, 0.7);
         border-color: rgba(15, 118, 110, 0.9);
     }
     100% {
-        /* Snap back */
         transform: translate(0, 0) scale(1) rotate(0deg);
         filter: brightness(1);
         box-shadow: 0 10px 40px -10px rgba(0,0,0,0.1);
@@ -144,126 +211,66 @@ canvas {
     }
 }
 
-.delay-100 { animation-delay: 100ms; }
-.delay-200 { animation-delay: 200ms; }
-.delay-300 { animation-delay: 300ms; }
-
-/* --- Form Elements --- */
-.input-group {
-    position: relative;
-    transition: all 0.2s ease;
-}
-
-.input-field {
-    width: 100%;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 0.75rem;
-    padding: 1rem 1rem 0.5rem; /* Top padding for label space */
-    font-size: 1.1rem;
-    color: #334155;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    outline: none;
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
-}
-
-.input-field:focus {
-    background: #ffffff;
-    border-color: #0f766e;
-    box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.1);
-}
-
-.input-label {
-    position: absolute;
-    left: 1rem;
-    top: 0.35rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: #64748b;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+/* --- Success Journey (Button to Center Toast) --- */
+.success-journey {
+    animation: successCenter 1.0s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    z-index: 9999;
+    will-change: transform, width, background-color, border-radius;
+    transition: none !important;
     pointer-events: none;
-    transition: all 0.2s ease;
 }
 
-/* Checkbox Styling */
-.checkbox-card {
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 0.75rem;
-    transition: all 0.2s ease;
+@keyframes successCenter {
+    0% {
+        transform: translate(0, 0) scale(1);
+        width: auto;
+        border-radius: 9999px;
+        background-color: #0f172a;
+        font-size: 1rem;
+    }
+    100% {
+        transform: translate(var(--tx-center), var(--ty-center)) scale(1.5);
+        width: 300px;
+        border-radius: 16px;
+        background-color: #0f766e;
+        box-shadow: 0 25px 50px -12px rgba(15, 118, 110, 0.7);
+        padding-left: 0; padding-right: 0;
+        font-size: 1.25rem;
+    }
 }
-.checkbox-card:hover {
-    border-color: #0f766e;
-    background: #f0fdfa;
+
+.success-return {
+    animation: successReturn 0.8s cubic-bezier(0.36, 0, 0.22, 1) forwards;
+    z-index: 9999;
+    will-change: transform, width, background-color, border-radius;
+    transition: none !important;
+    pointer-events: none;
 }
-.checkbox-card input:checked + div {
-    color: #0f766e;
-    font-weight: 600;
+
+@keyframes successReturn {
+    0% {
+        transform: translate(var(--tx-center), var(--ty-center)) scale(1.5);
+        width: 300px;
+        border-radius: 16px;
+        background-color: #0f766e;
+        font-size: 1.25rem;
+    }
+    100% {
+        transform: translate(0, 0) scale(1);
+        width: auto;
+        border-radius: 9999px;
+        background-color: #0f172a;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        font-size: 1rem;
+    }
 }
 
 /* Toast */
 .toast-enter {
-    animation: toastSlideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: toastSlideIn 0.6s var(--ease-spring) forwards;
 }
 @keyframes toastSlideIn {
     0% { opacity: 0; transform: translateY(-150%) scale(0.9); }
-    70% { opacity: 1; transform: translateY(5%) scale(1.02); } /* Overshoot for natural bounce */
-        100% {
-            opacity: 1; transform: translateY(0) scale(1);
-        }
-    }
-    
-    /* --- Success Journey (Button to Center Toast) --- */
-    .success-journey {
-        animation: successCenter 1.0s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        z-index: 9999;
-        will-change: transform, width, background-color, border-radius;
-        transition: none !important; /* Prevent conflicts */
-        pointer-events: none;
-    }
-    
-    @keyframes successCenter {
-        0% {
-            transform: translate(0, 0) scale(1);
-            width: auto;
-            border-radius: 9999px;
-            background-color: #0f172a;
-            font-size: 1rem;
-        }
-        100% {
-            transform: translate(var(--tx-center), var(--ty-center)) scale(1.5);
-            width: 300px;
-            border-radius: 16px;
-            background-color: #0f766e;
-            box-shadow: 0 25px 50px -12px rgba(15, 118, 110, 0.7);
-            padding-left: 0; padding-right: 0;
-            font-size: 1.25rem;
-        }
-    }
-    
-    .success-return {
-        animation: successReturn 0.8s cubic-bezier(0.36, 0, 0.22, 1) forwards;
-        z-index: 9999;
-        will-change: transform, width, background-color, border-radius;
-        transition: none !important;
-        pointer-events: none;
-    }
-    
-    @keyframes successReturn {
-        0% {
-            transform: translate(var(--tx-center), var(--ty-center)) scale(1.5);
-            width: 300px;
-            border-radius: 16px;
-            background-color: #0f766e;
-            font-size: 1.25rem;
-        }
-        100% {
-            transform: translate(0, 0) scale(1);
-            width: auto;
-            border-radius: 9999px;
-            background-color: #0f172a;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-            font-size: 1rem;
-        }
-    }
+    70% { opacity: 1; transform: translateY(5%) scale(1.02); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}

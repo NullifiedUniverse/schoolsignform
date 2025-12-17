@@ -1,45 +1,46 @@
-// --- Advanced Signature Logic ---
+// --- Advanced Signature Logic & UI Interactions ---
 window.pads = {};
+
+// Helper: Haptic Feedback (Best Practice: feature check)
+const vibrate = (pattern) => {
+    if (navigator.vibrate) navigator.vibrate(pattern);
+};
 
 function initSignaturePad(id, name) {
     const canvas = document.getElementById(id);
     const parent = canvas.parentElement;
     
     // 1. High-Performance Configuration
-    // We use 'pointer' events to support S-Pen/Apple Pencil pressure and eraser buttons
-    canvas.style.touchAction = 'none'; // Prevent scrolling while signing
+    // Enforce touch-action in JS for redundancy
+    canvas.style.touchAction = 'none';
     
     const signaturePad = new SignaturePad(canvas, {
         minWidth: 1.0, 
         maxWidth: 4.0, 
         penColor: "#1e293b",
-        throttle: 16, // Best Practice: ~60Hz limit. Balances smoothness with device battery/cpu.
-        minDistance: 5, // Best Practice: Capture fewer points for cleaner data and faster rendering.
-        velocityFilterWeight: 0.7, 
+        throttle: 16, // 60Hz limit for performance
+        minDistance: 5, // Filter out micro-noise
+        velocityFilterWeight: 0.7, // Smooth curves
     });
     
-    // Store extra state for eraser toggle
     signaturePad.isErasing = false;
     window.pads[name] = signaturePad;
 
     // 2. Eraser Button Support (S-Pen / Surface Pen)
     canvas.addEventListener('pointerdown', (e) => {
-        // e.button === 5 is standard for eraser buttons on many styluses
-        // e.buttons === 32 is also common
-        if (e.button === 5 || e.buttons === 32 || e.pointerType === 'pen' && e.button === -1) { 
+        if (e.button === 5 || e.buttons === 32 || (e.pointerType === 'pen' && e.button === -1)) { 
             toggleEraser(name, true);
         }
     });
     
     canvas.addEventListener('pointerup', (e) => {
-        // If we were erasing with a button, switch back to pen on release
         if (signaturePad.isErasing && (e.button === 5 || e.button === -1)) {
            toggleEraser(name, false); 
         }
     });
 
     // 3. Retina/High-DPI Handling
-    function resizeCanvas() {
+    const resizeCanvas = () => {
         const ratio = Math.max(window.devicePixelRatio || 1, 1);
         const data = signaturePad.toData();
         canvas.width = parent.offsetWidth * ratio;
@@ -47,7 +48,7 @@ function initSignaturePad(id, name) {
         canvas.getContext("2d").scale(ratio, ratio);
         signaturePad.clear(); 
         signaturePad.fromData(data);
-    }
+    };
     
     window.addEventListener("resize", resizeCanvas);
     setTimeout(resizeCanvas, 200);
@@ -60,14 +61,80 @@ window.toggleEraser = function(name, forceState = null) {
     const newState = forceState !== null ? forceState : !pad.isErasing;
     pad.isErasing = newState;
 
+    const btn = document.getElementById(`btn-erase-${name}`);
+    
     if (pad.isErasing) {
         pad.compositeOperation = 'destination-out';
-        // Visual feedback (optional)
-        document.getElementById(`btn-erase-${name}`)?.classList.add('bg-teal-100', 'text-teal-700', 'border-teal-300');
+        btn?.classList.add('bg-teal-100', 'text-teal-700', 'border-teal-300');
+        vibrate(10); // Haptic tick
     } else {
         pad.compositeOperation = 'source-over';
-        document.getElementById(`btn-erase-${name}`)?.classList.remove('bg-teal-100', 'text-teal-700', 'border-teal-300');
+        btn?.classList.remove('bg-teal-100', 'text-teal-700', 'border-teal-300');
+        vibrate(10);
     }
+}
+
+function clearPad(name) {
+    if(window.pads[name]) {
+        window.pads[name].clear();
+        vibrate(15); // Slightly stronger tick
+    }
+}
+
+// --- Parallax Effect ---
+document.addEventListener('mousemove', (e) => {
+    // Only apply if pointer is fine (mouse) and not during animations
+    if (window.matchMedia('(hover: hover)').matches) {
+        const container = document.getElementById('paper-container');
+        // Disable parallax during complex animations to prevent conflicts
+        if (container && 
+            !container.classList.contains('magic-morph') && 
+            !container.classList.contains('magic-reject') &&
+            !container.classList.contains('magic-morph-reverse')) {
+            
+            // Calculate center offset
+            const x = (e.clientX / window.innerWidth - 0.5) * 20; // Max 10px tilt
+            const y = (e.clientY / window.innerHeight - 0.5) * 20;
+            
+            // Apply subtle transform
+            container.style.transform = `translate(${x}px, ${y}px)`;
+        }
+    }
+});
+
+function triggerRejectAnimation() {
+    const element = document.getElementById('paper-container');
+    const btn = document.getElementById('submit-btn');
+    
+    // Haptic Error Feedback
+    vibrate([50, 50, 50]);
+
+    // Calculate Geometry
+    const formRect = element.getBoundingClientRect();
+    const btnRect = btn.getBoundingClientRect();
+    
+    const formCenterX = formRect.left + formRect.width / 2;
+    const formCenterY = formRect.top + formRect.height / 2;
+    const btnCenterX = btnRect.left + btnRect.width / 2;
+    const btnCenterY = btnRect.top + btnRect.height / 2;
+
+    const tx = btnCenterX - formCenterX;
+    const ty = btnCenterY - formCenterY;
+
+    // Trigger Animation
+    element.style.setProperty('--tx', `${tx}px`);
+    element.style.setProperty('--ty', `${ty}px`);
+    
+    element.classList.remove('animate-bento'); 
+    element.classList.remove('magic-reject');
+    void element.offsetWidth; // Force Reflow
+    element.classList.add('magic-reject');
+
+    setTimeout(() => {
+        element.classList.remove('magic-reject');
+        // Reset transform from parallax if needed
+        element.style.transform = ''; 
+    }, 800);
 }
 
 async function submitToServer() {
@@ -77,6 +144,7 @@ async function submitToServer() {
     const sigStudent = window.pads['student'];
     const sigParent = window.pads['parent'];
 
+    // Validation
     if (!studentName || !studentId || !parentName) {
         triggerRejectAnimation();
         showToast("⚠️ Missing Information", "Please fill in all name and ID fields.");
@@ -96,17 +164,17 @@ async function submitToServer() {
     try {
         const element = document.getElementById('paper-container');
         
-        // --- CAPTURE LOGIC (Restored from previous turn) ---
+        // Capture logic with DOM Replacement for perfect text rendering
         const canvas = await html2canvas(element, {
             scale: 2,
             useCORS: true,
             backgroundColor: '#ffffff',
             logging: false,
-            windowWidth: 1200, // Force desktop width for consistency
+            windowWidth: 1200, 
             onclone: (clonedDoc) => {
                 const clonedElement = clonedDoc.getElementById('paper-container');
                 if (clonedElement) {
-                    // Normalize for PDF/Image output
+                    // Normalize for output
                     clonedElement.style.width = '800px';
                     clonedElement.style.maxWidth = '800px';
                     clonedElement.style.margin = '0';
@@ -115,16 +183,15 @@ async function submitToServer() {
                     clonedElement.style.boxShadow = 'none';
                     clonedElement.style.border = '2px solid #000';
                     
-                    // Replace inputs with Divs to ensure perfect text rendering (fixes cutoff issues)
+                    // Replace inputs with standard Divs
                     clonedDoc.querySelectorAll('input[type="text"]').forEach(input => {
                         const textDiv = clonedDoc.createElement('div');
                         textDiv.textContent = input.value;
                         
-                        // Apply "Print/Image" Styling to the replacement Div
                         textDiv.style.display = 'block';
                         textDiv.style.width = '100%';
                         textDiv.style.borderBottom = '2px solid #333';
-                        textDiv.style.padding = '24px 0 8px 0'; // Space for label + text
+                        textDiv.style.padding = '24px 0 8px 0'; 
                         textDiv.style.fontSize = '18px';
                         textDiv.style.fontWeight = '500';
                         textDiv.style.fontFamily = 'Arial, sans-serif';
@@ -136,7 +203,7 @@ async function submitToServer() {
                         input.parentNode.replaceChild(textDiv, input);
                     });
 
-                    // Fix Label Positioning
+                    // Fix Labels
                     clonedDoc.querySelectorAll('.input-label').forEach(label => {
                         label.style.position = 'absolute';
                         label.style.top = '0';
@@ -144,35 +211,33 @@ async function submitToServer() {
                         label.style.color = '#475569';
                         label.style.fontSize = '12px';
                         label.style.fontWeight = 'bold';
-                        label.style.transform = 'none'; // Reset any transitions
+                        label.style.transform = 'none';
                     });
 
-                    // Hide "Clear" buttons in print
+                    // Hide unwanted UI
                      clonedDoc.querySelectorAll('button').forEach(b => b.style.display = 'none');
+                     clonedDoc.querySelector('.absolute.bottom-2')?.remove(); // Remove screen watermark if duplicate
                 }
             }
         });
 
         const base64Image = canvas.toDataURL("image/png");
 
-        // --- TRIGGER MAGIC LAMP ANIMATION ---
-        // 1. Calculate Geometry
+        // --- TRIGGER MAGIC LAMP MORPH ---
+        // Calculate Geometry
         const formRect = element.getBoundingClientRect();
         const btnRect = btn.getBoundingClientRect();
-        
-        const formCenterX = formRect.left + formRect.width / 2;
-        const formCenterY = formRect.top + formRect.height / 2;
-        const btnCenterX = btnRect.left + btnRect.width / 2;
-        const btnCenterY = btnRect.top + btnRect.height / 2;
+        const tx = (btnRect.left + btnRect.width/2) - (formRect.left + formRect.width/2);
+        const ty = (btnRect.top + btnRect.height/2) - (formRect.top + formRect.height/2);
 
-        const tx = btnCenterX - formCenterX;
-        const ty = btnCenterY - formCenterY;
-
-        // 2. Set Trajectory & Animate
+        // Animate
         element.style.setProperty('--tx', `${tx}px`);
         element.style.setProperty('--ty', `${ty}px`);
-        element.classList.remove('animate-bento', 'magic-morph-reverse'); // Clear prev animations
+        element.classList.remove('animate-bento', 'magic-morph-reverse');
         element.classList.add('magic-morph');
+        
+        // Haptic Feedback for Morph start
+        vibrate(20);
 
         const response = await fetch('/api/upload', {
             method: 'POST',
@@ -185,51 +250,35 @@ async function submitToServer() {
         });
 
         if (response.ok) {
-            // --- SUCCESS ANIMATION SEQUENCE ---
-            
-            // 1. Calculate Button -> Center Trajectory
-            // Note: We need the button's current rect relative to viewport
-            const finalBtnRect = btn.getBoundingClientRect();
-            const viewportCenterX = window.innerWidth / 2;
-            const viewportCenterY = window.innerHeight / 2;
-            const btnCenterX = finalBtnRect.left + finalBtnRect.width / 2;
-            const btnCenterY = finalBtnRect.top + finalBtnRect.height / 2;
-            
-            const txCenter = viewportCenterX - btnCenterX;
-            const tyCenter = viewportCenterY - btnCenterY;
+            // --- SUCCESS JOURNEY ---
+            vibrate([50, 100, 50]); // Success Haptics
 
-            // ... existing animation logic ...
-            // 2. Animate Button to Center (Morph to Toast)
+            // Calculate Center Trajectory
+            const finalBtnRect = btn.getBoundingClientRect();
+            const txCenter = (window.innerWidth / 2) - (finalBtnRect.left + finalBtnRect.width/2);
+            const tyCenter = (window.innerHeight / 2) - (finalBtnRect.top + finalBtnRect.height/2);
+
             btn.style.setProperty('--tx-center', `${txCenter}px`);
             btn.style.setProperty('--ty-center', `${tyCenter}px`);
             btn.classList.add('success-journey');
-            btn.innerHTML = `<span class="flex items-center gap-2 font-bold text-xl">✨ Success!</span>`; // Larger text
+            btn.innerHTML = `<span class="flex items-center gap-2 font-bold text-xl">✨ Success!</span>`;
 
-            // 3. Sequence: Return -> Form Reappear -> Reload
+            // Sequence
             setTimeout(() => {
-                // A. Glide Back
+                // Return
                 btn.classList.remove('success-journey');
                 btn.classList.add('success-return');
                 
-                // Restore Button Text (Smoothly if possible, but swap is fine for return)
-                setTimeout(() => {
-                    btn.innerHTML = originalContent;
-                }, 200); // Slight delay to hide text swap during shrink
+                setTimeout(() => { btn.innerHTML = originalContent; }, 200);
 
                 setTimeout(() => {
-                    // B. Form Reappears
-                    const container = document.getElementById('paper-container');
-                    container.classList.remove('magic-morph');
-                    container.classList.add('magic-morph-reverse');
+                    // Form Reappear
+                    element.classList.remove('magic-morph');
+                    element.classList.add('magic-morph-reverse');
 
-                    setTimeout(() => {
-                        // C. Hard Reset
-                        window.location.reload();
-                    }, 1200); 
-
-                }, 800); // Wait for button to settle back
-
-            }, 3500); // Hold success message longer
+                    setTimeout(() => { window.location.reload(); }, 1200); 
+                }, 800);
+            }, 3500); 
 
         } else {
             throw new Error('Server upload failed');
@@ -237,19 +286,20 @@ async function submitToServer() {
 
     } catch (err) {
         console.error(err);
+        triggerRejectAnimation(); // Use reject anim for server error too
         showToast("❌ Error", "Upload failed. Please try again.");
         
-        // Reverse Animation on Error
+        // Reverse Morph if it happened
         const element = document.getElementById('paper-container');
-        element.classList.remove('magic-morph');
-        element.classList.add('magic-morph-reverse');
+        if(element.classList.contains('magic-morph')) {
+            element.classList.remove('magic-morph');
+            element.classList.add('magic-morph-reverse');
+        }
         
-        // Reset Button ONLY on error
+        // Reset Button
         btn.disabled = false;
         btn.innerHTML = originalContent;
     }
-    // No finally block to prevent button re-enabling during success animation
-}
 }
 
 function showToast(title, message) {
@@ -267,10 +317,6 @@ function showToast(title, message) {
     }, 3000);
 }
 
-function clearPad(name) {
-    if(window.pads[name]) window.pads[name].clear();
-}
-
 document.addEventListener('DOMContentLoaded', () => {
     initSignaturePad('canvas-student', 'student');
     initSignaturePad('canvas-parent', 'parent');
@@ -279,33 +325,3 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('auto-month').textContent = (now.getMonth() + 1).toString().padStart(2, '0');
     document.getElementById('auto-day').textContent = now.getDate().toString().padStart(2, '0');
 });
-
-function triggerRejectAnimation() {
-    const element = document.getElementById('paper-container');
-    const btn = document.getElementById('submit-btn');
-    
-    // Calculate Geometry (Same as submit)
-    const formRect = element.getBoundingClientRect();
-    const btnRect = btn.getBoundingClientRect();
-    
-    const formCenterX = formRect.left + formRect.width / 2;
-    const formCenterY = formRect.top + formRect.height / 2;
-    const btnCenterX = btnRect.left + btnRect.width / 2;
-    const btnCenterY = btnRect.top + btnRect.height / 2;
-
-    const tx = btnCenterX - formCenterX;
-    const ty = btnCenterY - formCenterY;
-
-    // Set variables and trigger
-    element.style.setProperty('--tx', `${tx}px`);
-    element.style.setProperty('--ty', `${ty}px`);
-    
-    element.classList.remove('animate-bento'); // Stop entrance anim if still playing
-    element.classList.remove('magic-reject'); // Reset if spamming
-    void element.offsetWidth; // Force reflow
-    element.classList.add('magic-reject');
-
-    setTimeout(() => {
-        element.classList.remove('magic-reject');
-    }, 800);
-}
