@@ -87,13 +87,12 @@ function triggerReject() {
     
     setTimeout(() => {
         form.classList.remove('magic-reject');
-        // Ensure styles are explicitly reset by animation for a clean slate
         form.style.removeProperty('transform');
         form.style.removeProperty('filter'); 
         form.style.removeProperty('opacity');
         form.style.removeProperty('border-radius');
         form.style.removeProperty('box-shadow');
-    }, 1000); // Match genieBounceBack duration (1s)
+    }, 1000); 
 }
 
 function resetFormState() {
@@ -113,6 +112,17 @@ function resetFormState() {
     const btn = getEl('submit-btn');
     btn.disabled = false;
     btn.classList.remove('success-journey', 'success-return');
+    
+    // Restore styling (unlock position)
+    btn.style.position = ''; 
+    btn.style.left = '';
+    btn.style.top = '';
+    btn.style.right = '';
+    btn.style.bottom = '';
+    btn.style.width = '';
+    btn.style.height = '';
+    btn.style.transform = '';
+    
     btn.innerHTML = `<div class="absolute inset-0 bg-teal-500 rounded-full opacity-0 group-hover:opacity-20 transition-opacity blur-lg"></div><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg><span class="font-sans font-bold tracking-wide">Submit Document</span>`;
     
     showToast("✨ Ready", "Form reset.");
@@ -122,18 +132,14 @@ function resetFormState() {
 // --- Submission Pipeline ---
 
 async function captureSnapshot(element) {
-    // Optimizing capture: simpler clone process
     return html2canvas(element, {
         scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false,
         onclone: (doc) => {
             const el = doc.getElementById('paper-container');
             if (el) {
-                // Flatten styles for cleaner capture
                 el.style.width = '800px'; el.style.maxWidth = '800px';
                 el.style.transform = 'none'; el.style.margin = '0';
                 el.style.boxShadow = 'none'; el.style.border = '2px solid #000';
-                
-                // Inputs to Text
                 doc.querySelectorAll('input[type="text"]').forEach(input => {
                     const d = doc.createElement('div');
                     d.textContent = input.value;
@@ -143,9 +149,8 @@ async function captureSnapshot(element) {
                     });
                     input.parentNode.replaceChild(d, input);
                 });
-                // Remove UI Elements
                 doc.querySelectorAll('button').forEach(b => b.style.display = 'none');
-                doc.querySelector('.absolute.bottom-2')?.remove(); // Watermark
+                doc.querySelector('.absolute.bottom-2')?.remove();
             }
         }
     }).then(c => c.toDataURL("image/png"));
@@ -154,7 +159,6 @@ async function captureSnapshot(element) {
 window.submitToServer = async function() {
     if (APP.isSubmitting) return;
     
-    // 1. Validation
     const name = getEl('student-name').value.trim();
     const id = getEl('student-id').value.trim();
     const parent = getEl('parent-name').value.trim();
@@ -173,13 +177,11 @@ window.submitToServer = async function() {
 
     try {
         const form = getEl('paper-container');
-        
-        // 2. Capture
         const base64 = await captureSnapshot(form);
         
-        // 3. Calculate Geometry for Genie Effect
+        // --- PREPARE ANIMATION GEOMETRY ---
         const fRect = form.getBoundingClientRect();
-        const bRect = btn.getBoundingClientRect();
+        const bRect = btn.getBoundingClientRect(); // Capture BEFORE locking
         
         const tx = (bRect.left + bRect.width/2) - (fRect.left + fRect.width/2);
         const ty = (bRect.top + bRect.height/2) - (fRect.top + fRect.height/2);
@@ -187,12 +189,10 @@ window.submitToServer = async function() {
         form.style.setProperty('--tx', `${tx}px`);
         form.style.setProperty('--ty', `${ty}px`);
         
-        // 4. Trigger Genie Animation
         form.classList.remove('animate-bento', 'magic-morph-reverse');
         form.classList.add('magic-morph');
         vibrate(20);
 
-        // 5. Upload
         const res = await fetch('/api/upload', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -201,46 +201,48 @@ window.submitToServer = async function() {
 
         if (!res.ok) throw new Error('Upload failed');
 
-        // SLIGHT PAUSE requested by user
         await new Promise(r => setTimeout(r, 400));
 
-        // 6. Success Animation
+        // --- SUCCESS ANIMATION ---
         vibrate([50, 100, 50]);
         
-        // Setup Button Morph
-        const finalRect = btn.getBoundingClientRect();
-        // Calculate center of the screen, adjusted for new target size
-        const targetWidth = Math.min(window.innerWidth * 0.9, 500); // Use the new larger target
-        const targetHeight = 72; // Keep height consistent
+        // 1. Lock Button Position (Critical for smooth expansion)
+        btn.style.position = 'fixed';
+        btn.style.left = `${bRect.left}px`;
+        btn.style.top = `${bRect.top}px`;
+        btn.style.right = 'auto';
+        btn.style.bottom = 'auto';
+        btn.style.width = `${bRect.width}px`;
+        btn.style.height = `${bRect.height}px`;
         
-        // Corrected centering calculation for the expanded toast
-        const cx = (window.innerWidth / 2) - (finalRect.left + finalRect.width / 2) - ((targetWidth - finalRect.width) / 2);
-        const cy = (window.innerHeight / 2) - (finalRect.top + finalRect.height / 2) - ((targetHeight - finalRect.height) / 2);
+        // 2. Calculate Centering
+        // Target logic: 500px or 90vw
+        const targetWidth = Math.min(window.innerWidth * 0.9, 500);
+        // Correct vector: ScreenCenter - StartTopLeft - HalfTargetWidth
+        const cx = (window.innerWidth / 2) - bRect.left - (targetWidth / 2);
+        const cy = (window.innerHeight / 2) - bRect.top - (72 / 2); // 72 is target height
         
-        btn.style.setProperty('--btn-w', `${finalRect.width}px`);
-        btn.style.setProperty('--btn-h', `${finalRect.height}px`);
+        const startRadius = bRect.height / 2;
+
+        btn.style.setProperty('--btn-w', `${bRect.width}px`);
+        btn.style.setProperty('--btn-h', `${bRect.height}px`);
+        btn.style.setProperty('--btn-radius-start', `${startRadius}px`);
         btn.style.setProperty('--tx-center', `${cx}px`);
         btn.style.setProperty('--ty-center', `${cy}px`);
         
         btn.classList.add('success-journey');
         
-        // Text Swap
         setTimeout(() => {
              btn.innerHTML = `<span class="flex items-center gap-2 font-bold text-xl whitespace-nowrap">✨ Success!</span>`;
         }, 150);
 
-        // 7. Reset Sequence
         setTimeout(() => {
-            // Return Button
             btn.classList.remove('success-journey');
             btn.classList.add('success-return');
             
-            // Re-appear Form
             setTimeout(() => {
                 form.classList.remove('magic-morph');
                 form.classList.add('magic-morph-reverse');
-                
-                // Final State Reset
                 setTimeout(resetFormState, 800);
             }, 500);
             
@@ -248,16 +250,15 @@ window.submitToServer = async function() {
 
     } catch (err) {
         console.error(err);
-        triggerReject(); // Trigger the bounce-back animation
+        triggerReject();
         showToast("❌ Error", "Upload failed.");
         
-        // Recover UI - This setTimeout should match the bounce-back animation duration
         setTimeout(() => {
-             // genieBounceBack already ensures styles are reset
-             // No explicit opacity/transform needed here as the animation handles it
-             // but ensure isSubmitting is false
+             form.classList.remove('magic-morph');
+             form.style.opacity = '1';
+             form.style.transform = 'none';
              APP.isSubmitting = false;
-        }, 1000); // Matching genieBounceBack duration (1s)
+        }, 1000);
         
         btn.disabled = false;
         btn.innerHTML = originalBtn;
@@ -278,11 +279,9 @@ function showToast(title, msg) {
     }, 3000);
 }
 
-// Init
 document.addEventListener('DOMContentLoaded', () => {
     initSignaturePad('canvas-student', 'student');
     initSignaturePad('canvas-parent', 'parent');
-    
     const d = new Date();
     getEl('auto-month').textContent = (d.getMonth() + 1).toString().padStart(2, '0');
     getEl('auto-day').textContent = d.getDate().toString().padStart(2, '0');

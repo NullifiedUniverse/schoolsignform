@@ -158,7 +158,7 @@ canvas { touch-action: none; }
         transform: translate(0, 0);
         width: var(--btn-w);
         height: var(--btn-h);
-        border-radius: 9999px;
+        border-radius: var(--btn-radius-start, 9999px);
     }
     100% {
         transform: translate(var(--tx-center), var(--ty-center));
