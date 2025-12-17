@@ -185,12 +185,51 @@ async function submitToServer() {
         });
 
         if (response.ok) {
-            showToast("✅ Success", "Document uploaded securely.");
-            // 3. Kick User / Reset Session
+            // --- SUCCESS ANIMATION SEQUENCE ---
+            
+            // 1. Calculate Button -> Center Trajectory
+            // Note: We need the button's current rect relative to viewport
+            const finalBtnRect = btn.getBoundingClientRect();
+            const viewportCenterX = window.innerWidth / 2;
+            const viewportCenterY = window.innerHeight / 2;
+            const btnCenterX = finalBtnRect.left + finalBtnRect.width / 2;
+            const btnCenterY = finalBtnRect.top + finalBtnRect.height / 2;
+            
+            const txCenter = viewportCenterX - btnCenterX;
+            const tyCenter = viewportCenterY - btnCenterY;
+
+            // 2. Animate Button to Center (Morph to Toast)
+            btn.style.setProperty('--tx-center', `${txCenter}px`);
+            btn.style.setProperty('--ty-center', `${tyCenter}px`);
+            btn.classList.add('success-journey');
+            btn.innerHTML = `<span class="flex items-center gap-2 font-bold text-lg">✨ Success!</span>`; // Simple toast text
+
+            // 3. Sequence: Return -> Form Reappear -> Reload
             setTimeout(() => {
-                showToast("👋 Goodbye", "Resetting form for next user...");
-                setTimeout(() => window.location.reload(), 1500);
-            }, 1000);
+                // A. Glide Back
+                btn.classList.remove('success-journey');
+                btn.classList.add('success-return');
+                
+                // Restore Button Text (Smoothly if possible, but swap is fine for return)
+                setTimeout(() => {
+                    btn.innerHTML = originalContent;
+                }, 200); // Slight delay to hide text swap during shrink
+
+                setTimeout(() => {
+                    // B. Form Reappears
+                    const container = document.getElementById('paper-container');
+                    container.classList.remove('magic-morph');
+                    container.classList.add('magic-morph-reverse');
+
+                    setTimeout(() => {
+                        // C. Hard Reset
+                        window.location.reload();
+                    }, 1200); 
+
+                }, 800); // Wait for button to settle back
+
+            }, 2500); // Hold success message
+
         } else {
             throw new Error('Server upload failed');
         }
