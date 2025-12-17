@@ -3,11 +3,10 @@
 :root {
     --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
     --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
-    --ease-elastic: cubic-bezier(0.68, -0.6, 0.32, 1.6); /* For snap effects */
 }
 
 body {
-    background-color: #0f172a; /* Dark Slate */
+    background-color: #0f172a; 
     background-image: 
         radial-gradient(at 0% 0%, rgba(15, 118, 110, 0.15) 0px, transparent 50%),
         radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.15) 0px, transparent 50%);
@@ -107,6 +106,7 @@ canvas { touch-action: none; }
 /* --- Magic Lamp / Genie Morph --- */
 .magic-morph {
     transform-origin: center center;
+    /* Custom cubic bezier for "vacuum" feel: Start slow, snap fast */
     animation: genieSuck 0.8s cubic-bezier(0.7, 0, 0.2, 1) forwards;
     pointer-events: none;
     will-change: transform, opacity, filter, border-radius, background-color;
@@ -120,10 +120,10 @@ canvas { touch-action: none; }
         background-color: #f1f5f9;
     }
     40% {
-        /* Extreme Stretch towards button */
+        /* VISIBLE STRETCH: Narrower width, taller height towards button */
         transform: translate(calc(var(--tx) * 0.15), calc(var(--ty) * 0.15)) scale(0.6, 1.4); 
         opacity: 1;
-        border-radius: 4rem; /* Start rounding early */
+        border-radius: 4rem; /* Start rounding aggressively */
     }
     100% {
         transform: translate(var(--tx), var(--ty)) scale(0.01);
@@ -144,7 +144,6 @@ canvas { touch-action: none; }
         opacity: 0; filter: blur(15px);
     }
     60% {
-        /* Slight overshoot */
         transform: translate(0, 0) scale(1.02);
         opacity: 1; filter: blur(0);
     }
@@ -167,9 +166,9 @@ canvas { touch-action: none; }
     100% { transform: translate(0, 0); border-color: rgba(255,255,255,0.5); }
 }
 
-/* --- Success Journey (Button to Center Toast) --- */
+/* --- Success Journey --- */
 .success-journey {
-    animation: successCenter 1.2s cubic-bezier(0.2, 0, 0.2, 1) forwards;
+    animation: successCenter 1.2s var(--ease-smooth) forwards;
     z-index: 9999;
     will-change: transform, width, height, border-radius, background-color;
     transition: none !important;
@@ -182,7 +181,7 @@ canvas { touch-action: none; }
         transform: translate(0, 0) scale(1);
         width: var(--btn-w); 
         height: var(--btn-h);
-        border-radius: 3rem; /* 3rem = ~48px, approximates pill shape better than 9999px for interp */
+        border-radius: 3rem; /* Pill Shape */
         background-color: #0f172a;
         font-size: 1rem;
     }
@@ -190,7 +189,7 @@ canvas { touch-action: none; }
         transform: translate(var(--tx-center), var(--ty-center)) scale(1.2);
         width: 320px; 
         height: 70px; 
-        border-radius: 1rem; /* 16px */
+        border-radius: 1rem; /* Rect Shape */
         background-color: #0f766e;
         box-shadow: 0 25px 60px -12px rgba(15, 118, 110, 0.6);
         padding-left: 0; padding-right: 0;
@@ -212,7 +211,7 @@ canvas { touch-action: none; }
         transform: translate(var(--tx-center), var(--ty-center)) scale(1.2);
         width: 320px;
         height: 70px;
-        border-radius: 1rem; /* 16px */
+        border-radius: 1rem;
         background-color: #0f766e;
         font-size: 1.25rem;
     }
@@ -220,7 +219,7 @@ canvas { touch-action: none; }
         transform: translate(0, 0) scale(1);
         width: var(--btn-w);
         height: var(--btn-h);
-        border-radius: 3rem; /* 48px pill */
+        border-radius: 3rem;
         background-color: #0f172a;
         box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
         font-size: 1rem;
