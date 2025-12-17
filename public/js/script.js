@@ -7,13 +7,15 @@ function initSignaturePad(id, name) {
     
     // 1. High-Performance Configuration
     // We use 'pointer' events to support S-Pen/Apple Pencil pressure and eraser buttons
+    canvas.style.touchAction = 'none'; // Prevent scrolling while signing
+    
     const signaturePad = new SignaturePad(canvas, {
         minWidth: 1.0, 
-        maxWidth: 4.0, // Wider dynamic range for pressure
+        maxWidth: 4.0, 
         penColor: "#1e293b",
-        throttle: 0, // Disable throttling for max smoothness (modern devices handle this fine)
-        minDistance: 0, // Capture every point for high fidelity
-        velocityFilterWeight: 0.2, // Smoother curves
+        throttle: 8, // ~120Hz cap. 0 was too aggressive. 8ms balances smoothness vs performance.
+        minDistance: 3, // Ignore tiny micro-movements to reduce noise and rendering load
+        velocityFilterWeight: 0.7, // Increased from 0.2 for much smoother, less "jittery" lines
     });
     
     // Store extra state for eraser toggle
