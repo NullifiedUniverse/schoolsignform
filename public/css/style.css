@@ -3,6 +3,7 @@
 :root {
     --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
     --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+    --ease-elastic: cubic-bezier(0.68, -0.6, 0.32, 1.6); /* For snap effects */
 }
 
 body {
@@ -106,7 +107,7 @@ canvas { touch-action: none; }
 /* --- Magic Lamp / Genie Morph --- */
 .magic-morph {
     transform-origin: center center;
-    animation: genieSuck 0.8s cubic-bezier(0.55, 0.055, 0.675, 0.19) forwards; /* "In" Back ease */
+    animation: genieSuck 0.8s cubic-bezier(0.7, 0, 0.2, 1) forwards;
     pointer-events: none;
     will-change: transform, opacity, filter, border-radius, background-color;
 }
@@ -119,15 +120,15 @@ canvas { touch-action: none; }
         background-color: #f1f5f9;
     }
     40% {
-        /* Stretch towards the button (Vacuum effect) */
-        transform: translate(calc(var(--tx) * 0.1), calc(var(--ty) * 0.1)) scale(0.9, 1.15); 
+        /* Extreme Stretch towards button */
+        transform: translate(calc(var(--tx) * 0.15), calc(var(--ty) * 0.15)) scale(0.6, 1.4); 
         opacity: 1;
-        border-radius: 3rem;
+        border-radius: 4rem; /* Start rounding early */
     }
     100% {
         transform: translate(var(--tx), var(--ty)) scale(0.01);
         opacity: 0; 
-        filter: blur(20px);
+        filter: blur(15px);
         border-radius: 50%;
         background-color: #0f172a; 
     }
@@ -140,7 +141,12 @@ canvas { touch-action: none; }
 @keyframes genieAppear {
     0% {
         transform: translate(var(--tx), var(--ty)) scale(0.01);
-        opacity: 0; filter: blur(20px);
+        opacity: 0; filter: blur(15px);
+    }
+    60% {
+        /* Slight overshoot */
+        transform: translate(0, 0) scale(1.02);
+        opacity: 1; filter: blur(0);
     }
     100% {
         transform: translate(0, 0) scale(1);
@@ -163,7 +169,7 @@ canvas { touch-action: none; }
 
 /* --- Success Journey (Button to Center Toast) --- */
 .success-journey {
-    animation: successCenter 1.2s cubic-bezier(0.2, 0, 0.2, 1) forwards; /* Smooth easing */
+    animation: successCenter 1.2s cubic-bezier(0.2, 0, 0.2, 1) forwards;
     z-index: 9999;
     will-change: transform, width, height, border-radius, background-color;
     transition: none !important;
@@ -176,7 +182,7 @@ canvas { touch-action: none; }
         transform: translate(0, 0) scale(1);
         width: var(--btn-w); 
         height: var(--btn-h);
-        border-radius: 9999px; /* Pill */
+        border-radius: 3rem; /* 3rem = ~48px, approximates pill shape better than 9999px for interp */
         background-color: #0f172a;
         font-size: 1rem;
     }
@@ -184,7 +190,7 @@ canvas { touch-action: none; }
         transform: translate(var(--tx-center), var(--ty-center)) scale(1.2);
         width: 320px; 
         height: 70px; 
-        border-radius: 16px; /* Rect */
+        border-radius: 1rem; /* 16px */
         background-color: #0f766e;
         box-shadow: 0 25px 60px -12px rgba(15, 118, 110, 0.6);
         padding-left: 0; padding-right: 0;
@@ -206,7 +212,7 @@ canvas { touch-action: none; }
         transform: translate(var(--tx-center), var(--ty-center)) scale(1.2);
         width: 320px;
         height: 70px;
-        border-radius: 16px;
+        border-radius: 1rem; /* 16px */
         background-color: #0f766e;
         font-size: 1.25rem;
     }
@@ -214,7 +220,7 @@ canvas { touch-action: none; }
         transform: translate(0, 0) scale(1);
         width: var(--btn-w);
         height: var(--btn-h);
-        border-radius: 9999px;
+        border-radius: 3rem; /* 48px pill */
         background-color: #0f172a;
         box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
         font-size: 1rem;
