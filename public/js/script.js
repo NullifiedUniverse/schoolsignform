@@ -111,24 +111,25 @@ async function submitToServer() {
                     clonedElement.style.boxShadow = 'none';
                     clonedElement.style.border = '2px solid #000';
                     
-                    // Flatten text inputs (Student Name, ID, Parent Name)
+                    // Replace inputs with Divs to ensure perfect text rendering (fixes cutoff issues)
                     clonedDoc.querySelectorAll('input[type="text"]').forEach(input => {
-                        input.style.background = 'transparent';
-                        input.style.border = 'none';
-                        input.style.borderBottom = '2px solid #333';
-                        input.style.borderRadius = '0';
-                        input.style.color = '#000';
-                        input.style.padding = '28px 0 12px 0'; // More top/bottom padding
-                        input.style.lineHeight = 'normal'; // Reset line height
-                        input.style.fontFamily = 'Arial, sans-serif'; // Standard font for metrics
-                        input.style.height = 'auto';
-                        input.style.minHeight = '60px'; // Increase min-height
-                        input.style.boxSizing = 'border-box';
-                        input.style.overflow = 'visible';
-                        input.style.fontSize = '16px';
-                        input.style.width = '100%';
-                        input.style.boxShadow = 'none';
-                        input.style.margin = '0';
+                        const textDiv = clonedDoc.createElement('div');
+                        textDiv.textContent = input.value;
+                        
+                        // Apply "Print/Image" Styling to the replacement Div
+                        textDiv.style.display = 'block';
+                        textDiv.style.width = '100%';
+                        textDiv.style.borderBottom = '2px solid #333';
+                        textDiv.style.padding = '24px 0 8px 0'; // Space for label + text
+                        textDiv.style.fontSize = '18px';
+                        textDiv.style.fontWeight = '500';
+                        textDiv.style.fontFamily = 'Arial, sans-serif';
+                        textDiv.style.color = '#000';
+                        textDiv.style.background = 'transparent';
+                        textDiv.style.lineHeight = '1.4';
+                        textDiv.style.minHeight = '30px'; 
+                        
+                        input.parentNode.replaceChild(textDiv, input);
                     });
 
                     // Fix Label Positioning
