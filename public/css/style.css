@@ -1,0 +1,88 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Serif+TC:wght@400;700&display=swap');
+
+body {
+    background-color: #f3f4f6;
+    background-image: 
+        radial-gradient(at 0% 0%, rgba(15, 118, 110, 0.05) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.05) 0px, transparent 50%);
+    background-attachment: fixed;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* --- Animations --- */
+@keyframes bentoBounce {
+    0% { opacity: 0; transform: scale(0.95) translateY(20px); }
+    60% { opacity: 1; transform: scale(1.02) translateY(-5px); }
+    100% { transform: scale(1) translateY(0); }
+}
+
+.animate-bento {
+    animation: bentoBounce 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; /* Spring effect */
+}
+
+.delay-100 { animation-delay: 100ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+
+/* --- Form Elements --- */
+.input-group {
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.input-field {
+    width: 100%;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    padding: 1rem 1rem 0.5rem; /* Top padding for label space */
+    font-size: 1.1rem;
+    color: #334155;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    outline: none;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.input-field:focus {
+    background: #ffffff;
+    border-color: #0f766e;
+    box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.1);
+}
+
+.input-label {
+    position: absolute;
+    left: 1rem;
+    top: 0.35rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    pointer-events: none;
+    transition: all 0.2s ease;
+}
+
+/* Checkbox Styling */
+.checkbox-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    transition: all 0.2s ease;
+}
+.checkbox-card:hover {
+    border-color: #0f766e;
+    background: #f0fdfa;
+}
+.checkbox-card input:checked + div {
+    color: #0f766e;
+    font-weight: 600;
+}
+
+/* Toast */
+.toast-enter {
+    animation: toastPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+@keyframes toastPop {
+    0% { opacity: 0; transform: translateY(-20px) scale(0.9); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
