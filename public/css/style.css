@@ -39,7 +39,7 @@ canvas {
 }
 
 .animate-bento {
-    animation: hyperReveal 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards; /* "Hyper" smooth ease-out */
+    animation: hyperReveal 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; /* Adjusted for stronger start */
     will-change: transform, opacity, filter;
     transform-origin: center top;
     backface-visibility: hidden;
@@ -48,8 +48,8 @@ canvas {
 @keyframes hyperReveal {
     0% {
         opacity: 0;
-        transform: scale(1.05) translateY(30px) rotateX(5deg);
-        filter: blur(12px);
+        transform: scale(1.15) translateY(50px) rotateX(15deg); /* Stronger 3D entrance */
+        filter: blur(20px);
     }
     100% {
         opacity: 1;
@@ -74,14 +74,15 @@ canvas {
         filter: blur(0);
         border-radius: 1.5rem; /* Match rounded-3xl */
     }
-    20% {
-        transform: translate(0, 20px) scale(0.95); /* Anticipation (squash) */
+    40% {
+        /* Stretch anticipation before the suck */
+        transform: translate(0, -20px) scale(1.02, 0.95); 
         opacity: 1;
     }
     100% {
-        transform: translate(var(--tx), var(--ty)) scale(0.02) rotate(10deg);
+        transform: translate(var(--tx), var(--ty)) scale(0.01) rotate(20deg);
         opacity: 0;
-        filter: blur(20px);
+        filter: blur(30px);
         border-radius: 50%; /* Morph to button shape */
     }
 }
@@ -112,26 +113,27 @@ canvas {
 @keyframes genieReject {
     0% {
         transform: translate(0, 0) scale(1) rotate(0deg);
-        box-shadow: 0 10px 40px -10px rgba(0,0,0,0.1); /* Original shadow */
+        box-shadow: 0 10px 40px -10px rgba(0,0,0,0.1);
         border-color: rgba(255, 255, 255, 0.5);
     }
     30% {
-        /* Move towards button + Red Glow */
-        transform: translate(calc(var(--tx) * 0.2), calc(var(--ty) * 0.2)) scale(0.95) rotate(-3deg);
+        /* Stronger movement towards button + Red Glow */
+        transform: translate(calc(var(--tx) * 0.3), calc(var(--ty) * 0.3)) scale(0.95) rotate(-6deg);
         filter: brightness(0.9);
-        box-shadow: 0 0 30px rgba(239, 68, 68, 0.6); /* Red */
-        border-color: rgba(239, 68, 68, 0.8);
+        box-shadow: 0 0 40px rgba(239, 68, 68, 0.7); /* Red */
+        border-color: rgba(239, 68, 68, 0.9);
     }
-    45% {
-        /* Shake + White Flash */
-        transform: translate(calc(var(--tx) * 0.2), calc(var(--ty) * 0.2)) scale(0.95) rotate(3deg);
-        box-shadow: 0 0 50px rgba(255, 255, 255, 0.8); /* White */
+    50% {
+        /* Violent Shake + White Flash */
+        transform: translate(calc(var(--tx) * 0.3), calc(var(--ty) * 0.3)) scale(0.95) rotate(6deg);
+        box-shadow: 0 0 60px rgba(255, 255, 255, 0.9); /* White */
         border-color: #ffffff;
     }
-    60% {
-        transform: translate(calc(var(--tx) * 0.2), calc(var(--ty) * 0.2)) scale(0.95) rotate(-2deg);
-        box-shadow: 0 0 30px rgba(15, 118, 110, 0.6); /* Greenish return */
-        border-color: rgba(15, 118, 110, 0.8);
+    70% {
+        /* Return swing + Green/Teal tint */
+        transform: translate(calc(var(--tx) * 0.3), calc(var(--ty) * 0.3)) scale(0.95) rotate(-4deg);
+        box-shadow: 0 0 40px rgba(15, 118, 110, 0.7); /* Teal */
+        border-color: rgba(15, 118, 110, 0.9);
     }
     100% {
         /* Snap back */
@@ -202,9 +204,10 @@ canvas {
 
 /* Toast */
 .toast-enter {
-    animation: toastSlideIn 0.5s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+    animation: toastSlideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 @keyframes toastSlideIn {
     0% { opacity: 0; transform: translateY(-150%) scale(0.9); }
+    70% { opacity: 1; transform: translateY(5%) scale(1.02); } /* Overshoot for natural bounce */
     100% { opacity: 1; transform: translateY(0) scale(1); }
 }
