@@ -1,342 +1,418 @@
-// --- Advanced Signature Logic & UI Interactions ---
-window.pads = {};
+/**
+ * Signature System - Core Application Logic
+ * Powered by GSAP for High-Fidelity Motion Design
+ */
 
-// Helper: Haptic Feedback (Best Practice: feature check)
-const vibrate = (pattern) => {
-    if (navigator.vibrate) navigator.vibrate(pattern);
+const AppConfig = {
+    anim: {
+        successHold: 3500, 
+    },
+    haptics: {
+        tap: 10,
+        success: [50, 100, 50],
+        error: [50, 50, 50],
+    }
 };
 
-function initSignaturePad(id, name) {
-    const canvas = document.getElementById(id);
-    const parent = canvas.parentElement;
-    
-    canvas.style.touchAction = 'none';
-    
-    const signaturePad = new SignaturePad(canvas, {
-        minWidth: 1.0, 
-        maxWidth: 4.0, 
-        penColor: "#1e293b",
-        throttle: 16, 
-        minDistance: 5, 
-        velocityFilterWeight: 0.7, 
-    });
-    
-    signaturePad.isErasing = false;
-    window.pads[name] = signaturePad;
-
-    canvas.addEventListener('pointerdown', (e) => {
-        if (e.button === 5 || e.buttons === 32 || (e.pointerType === 'pen' && e.button === -1)) { 
-            toggleEraser(name, true);
-        }
-    });
-    
-    canvas.addEventListener('pointerup', (e) => {
-        if (signaturePad.isErasing && (e.button === 5 || e.button === -1)) {
-           toggleEraser(name, false); 
-        }
-    });
-
-    const resizeCanvas = () => {
-        const ratio = Math.max(window.devicePixelRatio || 1, 1);
-        const data = signaturePad.toData();
-        canvas.width = parent.offsetWidth * ratio;
-        canvas.height = parent.offsetHeight * ratio;
-        canvas.getContext("2d").scale(ratio, ratio);
-        signaturePad.clear(); 
-        signaturePad.fromData(data);
-    };
-    
-    window.addEventListener("resize", resizeCanvas);
-    setTimeout(resizeCanvas, 200);
-}
-
-window.toggleEraser = function(name, forceState = null) {
-    const pad = window.pads[name];
-    if (!pad) return;
-
-    const newState = forceState !== null ? forceState : !pad.isErasing;
-    pad.isErasing = newState;
-
-    const btn = document.getElementById(`btn-erase-${name}`);
-    
-    if (pad.isErasing) {
-        pad.compositeOperation = 'destination-out';
-        btn?.classList.add('bg-teal-100', 'text-teal-700', 'border-teal-300');
-        vibrate(10);
-    } else {
-        pad.compositeOperation = 'source-over';
-        btn?.classList.remove('bg-teal-100', 'text-teal-700', 'border-teal-300');
-        vibrate(10);
-    }
-}
-
-function clearPad(name) {
-    if(window.pads[name]) {
-        window.pads[name].clear();
-        vibrate(15);
-    }
-}
-
-// --- Parallax Effect ---
-document.addEventListener('mousemove', (e) => {
-    if (window.matchMedia('(hover: hover)').matches) {
-        const container = document.getElementById('paper-container');
-        if (container && 
-            !container.classList.contains('magic-morph') && 
-            !container.classList.contains('magic-reject') &&
-            !container.classList.contains('magic-morph-reverse')) {
-            
-            const x = (e.clientX / window.innerWidth - 0.5) * 20; 
-            const y = (e.clientY / window.innerHeight - 0.5) * 20;
-            
-            container.style.transform = `translate(${x}px, ${y}px)`;
-        }
-    }
-});
-
-function triggerRejectAnimation() {
-    const element = document.getElementById('paper-container');
-    const btn = document.getElementById('submit-btn');
-    
-    vibrate([50, 50, 50]);
-
-    const formRect = element.getBoundingClientRect();
-    const btnRect = btn.getBoundingClientRect();
-    
-    const formCenterX = formRect.left + formRect.width / 2;
-    const formCenterY = formRect.top + formRect.height / 2;
-    const btnCenterX = btnRect.left + btnRect.width / 2;
-    const btnCenterY = btnRect.top + btnRect.height / 2;
-
-    const tx = btnCenterX - formCenterX;
-    const ty = btnCenterY - formCenterY;
-
-    element.style.setProperty('--tx', `${tx}px`);
-    element.style.setProperty('--ty', `${ty}px`);
-    
-    element.classList.remove('animate-bento'); 
-    element.classList.remove('magic-reject');
-    void element.offsetWidth; 
-    element.classList.add('magic-reject');
-
-    setTimeout(() => {
-        element.classList.remove('magic-reject');
-        element.style.transform = ''; 
-    }, 800);
-}
-
-function resetFormState() {
-    // Clear Inputs
-    document.getElementById('student-name').value = '';
-    document.getElementById('student-id').value = '';
-    document.getElementById('parent-name').value = '';
-    
-    // Clear Signatures
-    Object.values(window.pads).forEach(pad => pad.clear());
-    
-    // Reset Classes (Ensure no residual animations)
-    const element = document.getElementById('paper-container');
-    element.classList.remove('magic-morph', 'magic-morph-reverse', 'animate-bento', 'magic-reject');
-    
-    // Reset Transform
-    element.style.transform = '';
-    
-    // Re-enable interactions & Button State
-    const btn = document.getElementById('submit-btn');
-    btn.disabled = false;
-    btn.classList.remove('success-return', 'success-journey');
-    btn.innerHTML = `<div class="absolute inset-0 bg-teal-500 rounded-full opacity-0 group-hover:opacity-20 transition-opacity blur-lg"></div><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg><span class="font-sans font-bold tracking-wide">Submit Document</span>`;
-    
-    showToast("✨ Ready", "Form reset for next student.");
-}
-
-async function submitToServer() {
-    const studentName = document.getElementById('student-name').value.trim();
-    const studentId = document.getElementById('student-id').value.trim();
-    const parentName = document.getElementById('parent-name').value.trim();
-    const sigStudent = window.pads['student'];
-    const sigParent = window.pads['parent'];
-
-    if (!studentName || !studentId || !parentName) {
-        triggerRejectAnimation();
-        showToast("⚠️ Missing Information", "Please fill in all name and ID fields.");
-        return;
-    }
-    if (sigStudent.isEmpty() || sigParent.isEmpty()) {
-        triggerRejectAnimation();
-        showToast("⚠️ Missing Signatures", "Both Student and Parent must sign.");
-        return;
-    }
-
-    const btn = document.getElementById('submit-btn');
-    const originalContent = btn.innerHTML; // We can use this or hardcode rebuild
-    btn.disabled = true;
-    btn.innerHTML = `<svg class="animate-spin h-5 w-5 text-teal-400 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Processing...`;
-
-    try {
-        const element = document.getElementById('paper-container');
-        
-        const canvas = await html2canvas(element, {
-            scale: 2,
-            useCORS: true,
-            backgroundColor: '#ffffff',
-            logging: false,
-            windowWidth: 1200, 
-            onclone: (clonedDoc) => {
-                const clonedElement = clonedDoc.getElementById('paper-container');
-                if (clonedElement) {
-                    clonedElement.style.width = '800px';
-                    clonedElement.style.maxWidth = '800px';
-                    clonedElement.style.margin = '0';
-                    clonedElement.style.transform = 'none';
-                    clonedElement.style.animation = 'none';
-                    clonedElement.style.boxShadow = 'none';
-                    clonedElement.style.border = '2px solid #000';
-                    
-                    clonedDoc.querySelectorAll('input[type="text"]').forEach(input => {
-                        const textDiv = clonedDoc.createElement('div');
-                        textDiv.textContent = input.value;
-                        textDiv.style.display = 'block';
-                        textDiv.style.width = '100%';
-                        textDiv.style.borderBottom = '2px solid #333';
-                        textDiv.style.padding = '24px 0 8px 0'; 
-                        textDiv.style.fontSize = '18px';
-                        textDiv.style.fontWeight = '500';
-                        textDiv.style.fontFamily = 'Arial, sans-serif';
-                        textDiv.style.color = '#000';
-                        textDiv.style.background = 'transparent';
-                        textDiv.style.lineHeight = '1.4';
-                        textDiv.style.minHeight = '30px'; 
-                        input.parentNode.replaceChild(textDiv, input);
-                    });
-
-                    clonedDoc.querySelectorAll('.input-label').forEach(label => {
-                        label.style.position = 'absolute';
-                        label.style.top = '0';
-                        label.style.left = '0';
-                        label.style.color = '#475569';
-                        label.style.fontSize = '12px';
-                        label.style.fontWeight = 'bold';
-                        label.style.transform = 'none';
-                    });
-
-                     clonedDoc.querySelectorAll('button').forEach(b => b.style.display = 'none');
-                     clonedDoc.querySelector('.absolute.bottom-2')?.remove();
-                }
+class SignatureApp {
+    constructor() {
+        this.pads = {};
+        this.ui = {
+            container: document.getElementById('paper-container'),
+            submitBtn: document.getElementById('submit-btn'),
+            inputs: {
+                studentName: document.getElementById('student-name'),
+                studentId: document.getElementById('student-id'),
+                parentName: document.getElementById('parent-name')
             }
+        };
+        
+        this.init();
+    }
+
+    init() {
+        this.setupSignaturePads();
+        this.setupParallax();
+        
+        // GSAP Defaults
+        gsap.defaults({ ease: "power2.out", duration: 0.5 });
+
+        // Expose globals
+        window.submitToServer = () => this.handleSubmit();
+        window.toggleEraser = (name, force) => this.toggleEraser(name, force);
+        window.clearPad = (name) => this.clearPad(name);
+        
+        this.setAutoDate();
+    }
+
+    // --- Signature Pad Management ---
+    setupSignaturePads() {
+        ['student', 'parent'].forEach(role => {
+            const canvas = document.getElementById(`canvas-${role}`);
+            if (!canvas) return;
+            canvas.style.touchAction = 'none';
+
+            const pad = new SignaturePad(canvas, {
+                minWidth: 1.0, maxWidth: 4.0, penColor: "#1e293b",
+                throttle: 16, minDistance: 5, velocityFilterWeight: 0.7
+            });
+
+            pad.isErasing = false;
+            this.pads[role] = pad;
+
+            canvas.addEventListener('pointerdown', (e) => {
+                if (e.button === 5 || e.buttons === 32 || (e.pointerType === 'pen' && e.button === -1)) {
+                    this.toggleEraser(role, true);
+                }
+            });
+
+            canvas.addEventListener('pointerup', (e) => {
+                if (pad.isErasing && (e.button === 5 || e.button === -1)) {
+                    this.toggleEraser(role, false);
+                }
+            });
         });
 
-        const base64Image = canvas.toDataURL("image/png");
+        const resizeObserver = new ResizeObserver(() => this.resizePads());
+        resizeObserver.observe(this.ui.container);
+    }
 
-        // --- MORPH ANIMATION START ---
-        const formRect = element.getBoundingClientRect();
-        const btnRect = btn.getBoundingClientRect();
+    resizePads() {
+        const ratio = Math.max(window.devicePixelRatio || 1, 1);
+        Object.keys(this.pads).forEach(role => {
+            const pad = this.pads[role];
+            if(pad.canvas.width === pad.canvas.parentElement.offsetWidth * ratio) return;
+            const data = pad.toData();
+            pad.canvas.width = pad.canvas.parentElement.offsetWidth * ratio;
+            pad.canvas.height = pad.canvas.parentElement.offsetHeight * ratio;
+            pad.canvas.getContext("2d").scale(ratio, ratio);
+            pad.clear();
+            pad.fromData(data);
+        });
+    }
+
+    toggleEraser(role, forceState = null) {
+        const pad = this.pads[role];
+        if (!pad) return;
+        const newState = forceState !== null ? forceState : !pad.isErasing;
+        pad.isErasing = newState;
+        pad.compositeOperation = newState ? 'destination-out' : 'source-over';
+        
+        const btn = document.getElementById(`btn-erase-${role}`);
+        if (btn) {
+            if (newState) btn.classList.add('bg-teal-100', 'text-teal-700', 'border-teal-300');
+            else btn.classList.remove('bg-teal-100', 'text-teal-700', 'border-teal-300');
+        }
+        this.vibrate(AppConfig.haptics.tap);
+    }
+
+    clearPad(role) {
+        if (this.pads[role]) {
+            this.pads[role].clear();
+            this.vibrate(AppConfig.haptics.tap);
+        }
+    }
+
+    // --- UI Effects ---
+    setupParallax() {
+        // Simple GSAP Parallax
+        this.ui.container.addEventListener('mousemove', (e) => {
+            if (!window.matchMedia('(hover: hover)').matches) return;
+            // Skip if animating (we check if GSAP tween is active on container)
+            if (gsap.isTweening(this.ui.container)) return;
+
+            const x = (e.clientX / window.innerWidth - 0.5) * 20;
+            const y = (e.clientY / window.innerHeight - 0.5) * 20;
+            
+            gsap.to(this.ui.container, {
+                x: x, y: y, 
+                duration: 0.5, 
+                ease: "power1.out",
+                overwrite: "auto"
+            });
+        });
+        
+        // Reset on mouse leave
+        this.ui.container.addEventListener('mouseleave', () => {
+             if (gsap.isTweening(this.ui.container)) return;
+             gsap.to(this.ui.container, { x: 0, y: 0, duration: 0.5 });
+        });
+    }
+
+    vibrate(pattern) {
+        if (navigator.vibrate) navigator.vibrate(pattern);
+    }
+
+    setAutoDate() {
+        const now = new Date();
+        document.getElementById('auto-month').textContent = (now.getMonth() + 1).toString().padStart(2, '0');
+        document.getElementById('auto-day').textContent = now.getDate().toString().padStart(2, '0');
+    }
+
+    showToast(title, message) {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        // Initial state for GSAP
+        toast.className = `bg-slate-900/90 backdrop-blur-md text-white px-6 py-4 rounded-2xl shadow-2xl border border-white/10 flex flex-col`;
+        toast.innerHTML = `<span class="font-bold text-teal-400 text-sm mb-1">${title}</span><span class="text-sm text-gray-200">${message}</span>`;
+        container.appendChild(toast);
+
+        // GSAP Toast Animation
+        gsap.fromTo(toast, 
+            { y: -50, opacity: 0, scale: 0.9 },
+            { y: 0, opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.7)" }
+        );
+
+        setTimeout(() => {
+            gsap.to(toast, {
+                y: -20, opacity: 0, duration: 0.3, 
+                onComplete: () => toast.remove()
+            });
+        }, 3000);
+    }
+
+    // --- Advanced GSAP Animations ---
+
+    // 1. Validation Shake
+    animateReject() {
+        this.vibrate(AppConfig.haptics.error);
+        const tl = gsap.timeline();
+        
+        // Calculate vector to button
+        const formRect = this.ui.container.getBoundingClientRect();
+        const btnRect = this.ui.submitBtn.getBoundingClientRect();
         const tx = (btnRect.left + btnRect.width/2) - (formRect.left + formRect.width/2);
         const ty = (btnRect.top + btnRect.height/2) - (formRect.top + formRect.height/2);
 
-        element.style.setProperty('--tx', `${tx}px`);
-        element.style.setProperty('--ty', `${ty}px`);
-        element.classList.remove('animate-bento', 'magic-morph-reverse');
-        element.classList.add('magic-morph');
-        
-        vibrate(20);
+        // Shake + Move slightly towards button + Red Glow
+        tl.to(this.ui.container, {
+            x: tx * 0.15, 
+            y: ty * 0.15, 
+            rotation: -2,
+            boxShadow: "0 0 40px rgba(239, 68, 68, 0.6)",
+            borderColor: "rgba(239, 68, 68, 0.8)",
+            duration: 0.2,
+            ease: "power2.out"
+        })
+        .to(this.ui.container, {
+            x: "+=5", rotation: 2, duration: 0.1, yoyo: true, repeat: 3
+        })
+        .to(this.ui.container, {
+            x: 0, y: 0, rotation: 0,
+            boxShadow: "0 10px 40px -10px rgba(0,0,0,0.1)",
+            borderColor: "rgba(255, 255, 255, 0.5)",
+            duration: 0.4,
+            ease: "elastic.out(1, 0.5)"
+        });
+    }
 
-        const response = await fetch('/api/upload', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                image: base64Image, 
-                studentName: studentName,
-                studentId: studentId
-            })
+    // 2. The Genie Morph (Form -> Button)
+    animateMorph() {
+        this.vibrate(AppConfig.haptics.tap);
+        
+        const formRect = this.ui.container.getBoundingClientRect();
+        const btnRect = this.ui.submitBtn.getBoundingClientRect();
+        
+        // Delta from Form Center to Button Center
+        const tx = (btnRect.left + btnRect.width/2) - (formRect.left + formRect.width/2);
+        const ty = (btnRect.top + btnRect.height/2) - (formRect.top + formRect.height/2);
+
+        const tl = gsap.timeline();
+
+        // Step 1: Anticipation (Squash)
+        tl.to(this.ui.container, {
+            scaleY: 0.95, scaleX: 1.05, y: 20,
+            duration: 0.2, ease: "power2.inOut"
+        })
+        // Step 2: The SUCK (Stretch & Move)
+        .to(this.ui.container, {
+            x: tx, y: ty,
+            scaleX: 0.05, scaleY: 0.05,
+            opacity: 0,
+            borderRadius: "50%",
+            backgroundColor: "#0f172a", // Match button color
+            rotation: 45,
+            filter: "blur(10px)",
+            duration: 0.6,
+            ease: "expo.in" // Accelerate into the button
+        }, ">")
+        // Parallel Stretch Effect (The "Noodle")
+        .to(this.ui.container, {
+            scaleX: 0.1, scaleY: 1.5, // Extreme thin stretch
+            rotation: 15,
+            duration: 0.3,
+            ease: "power1.in",
+        }, "<") // Start at same time as move
+        .to(this.ui.container, {
+            scaleX: 0.05, scaleY: 0.05, // Snap back to point
+            duration: 0.3,
+            ease: "power1.out"
+        }, ">-0.3"); // Overlap end
+    }
+
+    // 3. Success Journey (Button -> Toast)
+    animateSuccess() {
+        this.vibrate(AppConfig.haptics.success);
+        const btn = this.ui.submitBtn;
+        
+        // Calculate center of screen relative to button's current position
+        const btnRect = btn.getBoundingClientRect();
+        const tx = (window.innerWidth / 2) - (btnRect.left + btnRect.width/2);
+        const ty = (window.innerHeight / 2) - (btnRect.top + btnRect.height/2);
+
+        // Timeline for Button
+        const tl = gsap.timeline();
+
+        tl.to(btn, {
+            x: tx, y: ty,
+            width: Math.min(window.innerWidth * 0.9, 380), // Dynamic width
+            height: 72,
+            borderRadius: 16,
+            backgroundColor: "#0f766e", // Teal
+            scale: 1.2,
+            boxShadow: "0 25px 60px -12px rgba(15, 118, 110, 0.6)",
+            duration: 0.8,
+            ease: "elastic.out(1, 0.75)",
+            onStart: () => {
+                // Smooth Text Swap
+                gsap.to(btn.querySelector('svg'), { opacity: 0, duration: 0.2 });
+                gsap.to(btn.querySelector('span'), { opacity: 0, duration: 0.2, onComplete: () => {
+                    btn.innerHTML = `<span class="flex items-center gap-2 font-bold text-xl whitespace-nowrap opacity-0">✨ Success!</span>`;
+                    gsap.to(btn.querySelector('span'), { opacity: 1, duration: 0.3 });
+                }});
+            }
         });
 
-        if (response.ok) {
-            // --- SUCCESS ANIMATION ---
-            vibrate([50, 100, 50]);
-
-            const finalBtnRect = btn.getBoundingClientRect();
-            const txCenter = (window.innerWidth / 2) - (finalBtnRect.left + finalBtnRect.width/2);
-            const tyCenter = (window.innerHeight / 2) - (finalBtnRect.top + finalBtnRect.height/2);
-
-            btn.style.setProperty('--btn-w', `${finalBtnRect.width}px`);
-            btn.style.setProperty('--btn-h', `${finalBtnRect.height}px`);
-            btn.style.setProperty('--tx-center', `${txCenter}px`);
-            btn.style.setProperty('--ty-center', `${tyCenter}px`);
-
-            btn.classList.add('success-journey');
+        // Return Sequence
+        setTimeout(() => {
+            const tlReturn = gsap.timeline();
             
-            // Fade text out/in trick: We change content after delay
-            setTimeout(() => {
-                btn.innerHTML = `<span class="flex items-center gap-2 font-bold text-xl whitespace-nowrap">✨ Success!</span>`;
-            }, 100);
+            // Text Swap Back
+            tlReturn.to(btn.querySelector('span'), { opacity: 0, duration: 0.2, onComplete: () => {
+                 this.resetState(); // Trigger full reset logic which handles HTML rebuild
+            }});
+            
+            // Move Back
+            tlReturn.to(btn, {
+                x: 0, y: 0,
+                width: "", // Revert to auto/css
+                height: "",
+                scale: 1,
+                borderRadius: "9999px",
+                backgroundColor: "#0f172a", // Dark Slate
+                boxShadow: "none",
+                duration: 0.6,
+                ease: "power2.inOut"
+            }, "<");
 
-            // Sequence
-            setTimeout(() => {
-                // A. Return
-                btn.classList.remove('success-journey');
-                btn.classList.add('success-return');
-                
-                // Swap text back
-                setTimeout(() => {
-                    // Wait for resetFormState to do the full rebuild, or do partial here?
-                    // We'll let resetFormState handle the final text reset to be safe
-                }, 300);
+        }, AppConfig.anim.successHold);
+    }
 
-                setTimeout(() => {
-                    // B. Form Reappears
-                    element.classList.remove('magic-morph');
-                    element.classList.add('magic-morph-reverse');
-
-                    setTimeout(() => {
-                        // C. Soft Reset
-                        resetFormState();
-                    }, 1000); 
-
-                }, 800); 
-
-            }, 3500); 
-
-        } else {
-            throw new Error('Server upload failed');
-        }
-
-    } catch (err) {
-        console.error(err);
-        triggerRejectAnimation(); 
-        showToast("❌ Error", "Upload failed. Please try again.");
+    // 4. Reset
+    resetState() {
+        const btn = this.ui.submitBtn;
         
-        const element = document.getElementById('paper-container');
-        if(element.classList.contains('magic-morph')) {
-            element.classList.remove('magic-morph');
-            element.classList.add('magic-morph-reverse');
-        }
-        
+        // Clear Data
+        Object.values(this.ui.inputs).forEach(input => input.value = '');
+        Object.values(this.pads).forEach(pad => pad.clear());
+
+        // Rebuild Button Content
+        btn.innerHTML = `<div class="absolute inset-0 bg-teal-500 rounded-full opacity-0 group-hover:opacity-20 transition-opacity blur-lg"></div><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg><span class="font-sans font-bold tracking-wide">Submit Document</span>`;
         btn.disabled = false;
-        btn.innerHTML = originalContent;
+
+        // Form Reappear Animation
+        gsap.fromTo(this.ui.container, 
+            { scale: 0.05, opacity: 0, y: 50 },
+            { scale: 1, opacity: 1, y: 0, x: 0, rotation: 0, filter: "blur(0px)", borderRadius: "1.5rem", backgroundColor: "#f1f5f9", duration: 0.8, ease: "back.out(1.2)" }
+        );
+        
+        this.showToast("✨ Ready", "Form reset for next student.");
+    }
+
+    // --- Main Logic ---
+    validate() {
+        const { studentName, studentId, parentName } = this.ui.inputs;
+        if (!studentName.value.trim() || !studentId.value.trim() || !parentName.value.trim()) return "Please fill in all fields.";
+        if (this.pads['student'].isEmpty() || this.pads['parent'].isEmpty()) return "Signatures required.";
+        return null;
+    }
+
+    async handleSubmit() {
+        const error = this.validate();
+        if (error) {
+            this.animateReject();
+            this.showToast("⚠️ Check Fields", error);
+            return;
+        }
+
+        const btn = this.ui.submitBtn;
+        const originalContent = btn.innerHTML;
+        btn.disabled = true;
+        // Loading Spinner
+        btn.innerHTML = `<svg class="animate-spin h-5 w-5 text-teal-400 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Processing...`;
+
+        try {
+            const base64Image = await this.captureForm();
+            
+            // Start Morph
+            this.animateMorph();
+
+            const response = await fetch('/api/upload', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    image: base64Image, 
+                    studentName: this.ui.inputs.studentName.value,
+                    studentId: this.ui.inputs.studentId.value
+                })
+            });
+
+            if (response.ok) {
+                this.animateSuccess();
+            } else {
+                throw new Error('Server upload failed');
+            }
+
+        } catch (err) {
+            console.error(err);
+            this.showToast("❌ Error", "Upload failed.");
+            
+            // Revert Morph on Error
+            gsap.to(this.ui.container, {
+                scale: 1, opacity: 1, x: 0, y: 0, rotation: 0, filter: "blur(0px)",
+                duration: 0.5, ease: "power2.out"
+            });
+            btn.disabled = false;
+            btn.innerHTML = originalContent;
+        }
+    }
+
+    async captureForm() {
+        const canvas = await html2canvas(this.ui.container, {
+            scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false, windowWidth: 1200,
+            onclone: (clonedDoc) => {
+                const el = clonedDoc.getElementById('paper-container');
+                if (!el) return;
+                el.style.width = '800px'; el.style.maxWidth = '800px'; el.style.margin = '0';
+                el.style.transform = 'none'; el.style.boxShadow = 'none'; el.style.border = '2px solid #000';
+                
+                clonedDoc.querySelectorAll('input[type="text"]').forEach(input => {
+                    const div = clonedDoc.createElement('div');
+                    div.textContent = input.value;
+                    Object.assign(div.style, {
+                        display: 'block', width: '100%', borderBottom: '2px solid #333',
+                        padding: '24px 0 8px 0', fontSize: '18px', fontFamily: 'Arial', color: '#000'
+                    });
+                    input.parentNode.replaceChild(div, input);
+                });
+                clonedDoc.querySelectorAll('.input-label').forEach(l => {
+                    Object.assign(l.style, { position: 'absolute', top: '0', left: '0', color: '#475569', fontSize: '12px' });
+                });
+                clonedDoc.querySelectorAll('button').forEach(b => b.style.display = 'none');
+            }
+        });
+        return canvas.toDataURL("image/png");
     }
 }
 
-function showToast(title, message) {
-    const container = document.getElementById('toast-container');
-    const toast = document.createElement('div');
-    toast.className = `toast-enter bg-slate-900/90 backdrop-blur-md text-white px-6 py-4 rounded-2xl shadow-2xl border border-white/10 flex flex-col`;
-    toast.innerHTML = `<span class="font-bold text-teal-400 text-sm mb-1">${title}</span><span class="text-sm text-gray-200">${message}</span>`;
-    
-    container.appendChild(toast);
-    setTimeout(() => { 
-        toast.style.opacity = '0'; 
-        toast.style.transform = 'translateY(-10px)';
-        toast.style.transition = 'all 0.3s ease';
-        setTimeout(() => toast.remove(), 300); 
-    }, 3000);
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    initSignaturePad('canvas-student', 'student');
-    initSignaturePad('canvas-parent', 'parent');
-    
-    const now = new Date();
-    document.getElementById('auto-month').textContent = (now.getMonth() + 1).toString().padStart(2, '0');
-    document.getElementById('auto-day').textContent = now.getDate().toString().padStart(2, '0');
-});
+document.addEventListener('DOMContentLoaded', () => { window.app = new SignatureApp(); });
