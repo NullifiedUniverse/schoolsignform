@@ -1,8 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Serif+TC:wght@400;700&display=swap');
 
 :root {
-    --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.1); 
-    --ease-out-quint: cubic-bezier(0.23, 1, 0.32, 1);
+    /* Highly defined easing curves */
+    --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.1); /* Standard spring */
+    --ease-out-quint: cubic-bezier(0.23, 1, 0.32, 1); /* Deceleration */
+    --ease-in-quart: cubic-bezier(0.755, 0.05, 0.855, 0.06); /* Acceleration */
+    --ease-elastic: cubic-bezier(0.68, -0.6, 0.32, 1.6); /* Snap */
 }
 
 body {
@@ -13,7 +16,6 @@ body {
     background-attachment: fixed;
     -webkit-font-smoothing: antialiased;
     position: relative;
-    overflow-x: hidden;
 }
 
 body::before {
@@ -32,7 +34,7 @@ body::before {
 
 canvas { touch-action: none; }
 
-/* --- Staggered Entry (CSS for Initial Load) --- */
+/* --- Staggered Entry --- */
 @keyframes fadeInSlideUp {
     0% { opacity: 0; transform: translateY(20px); filter: blur(5px); }
     100% { opacity: 1; transform: translateY(0); filter: blur(0); }
@@ -104,4 +106,126 @@ canvas { touch-action: none; }
 }
 .checkbox-card input:checked + div { color: #0f766e; font-weight: 600; }
 
-/* Note: Complex transitions (Magic Lamp, Success Journey) are now handled by GSAP in script.js */
+/* --- Magic Lamp / Genie Morph --- */
+.magic-morph {
+    transform-origin: center center;
+    /* Accelerating curve for vacuum feel */
+    animation: genieSuck 0.7s var(--ease-in-quart) forwards; 
+    pointer-events: none;
+    will-change: transform, opacity, filter, border-radius, background-color;
+}
+
+@keyframes genieSuck {
+    0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1; filter: blur(0);
+        border-radius: 1.5rem;
+        background-color: #f1f5f9;
+    }
+    30% {
+        /* Anticipation: Pull back slightly */
+        transform: translate(0, -30px) scale(0.95, 1.05); 
+        opacity: 1;
+        border-radius: 2rem;
+    }
+    100% {
+        /* Snap into button */
+        transform: translate(var(--tx), var(--ty)) scale(0.05);
+        opacity: 0; 
+        filter: blur(8px); /* Reduced blur for mobile perf */
+        border-radius: 50%;
+        background-color: #0f172a; 
+    }
+}
+
+.magic-morph-reverse {
+    animation: genieAppear 0.8s var(--ease-out-quint) forwards;
+}
+
+@keyframes genieAppear {
+    0% {
+        transform: translate(var(--tx), var(--ty)) scale(0.05);
+        opacity: 0; filter: blur(8px);
+    }
+    100% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1; filter: blur(0);
+    }
+}
+
+/* --- Reject Effect --- */
+.magic-reject {
+    animation: genieReject 0.6s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+    transform-origin: center center;
+}
+@keyframes genieReject {
+    0% { transform: translate(0, 0); border-color: rgba(255,255,255,0.5); }
+    30% { transform: translate(calc(var(--tx) * 0.2), calc(var(--ty) * 0.2)) rotate(-3deg); box-shadow: 0 0 40px rgba(239,68,68,0.7); border-color: rgba(239,68,68,0.9); }
+    50% { transform: translate(calc(var(--tx) * 0.2), calc(var(--ty) * 0.2)) rotate(3deg); box-shadow: 0 0 60px rgba(255,255,255,0.9); border-color: #fff; }
+    70% { transform: translate(calc(var(--tx) * 0.2), calc(var(--ty) * 0.2)) rotate(-2deg); box-shadow: 0 0 40px rgba(15,118,110,0.7); border-color: rgba(15,118,110,0.9); }
+    100% { transform: translate(0, 0); border-color: rgba(255,255,255,0.5); }
+}
+
+/* --- Success Journey --- */
+.success-journey {
+    animation: successCenter 0.9s var(--ease-out-quint) forwards;
+    z-index: 9999;
+    will-change: transform, width, height, border-radius, background-color;
+    transition: none !important;
+    pointer-events: none;
+    overflow: hidden; 
+}
+
+@keyframes successCenter {
+    0% {
+        transform: translate(0, 0) scale(1);
+        width: var(--btn-w); 
+        height: var(--btn-h);
+        border-radius: 3rem; 
+        background-color: #0f172a;
+    }
+    100% {
+        transform: translate(var(--tx-center), var(--ty-center)) scale(1.2);
+        width: min(90vw, 380px); /* Dynamic sizing for mobile */
+        height: 72px; 
+        border-radius: 1rem; 
+        background-color: #0f766e;
+        box-shadow: 0 25px 60px -12px rgba(15, 118, 110, 0.6);
+        padding-left: 0; padding-right: 0;
+        font-size: 1.25rem;
+    }
+}
+
+.success-return {
+    animation: successReturn 0.8s var(--ease-out-quint) forwards;
+    z-index: 9999;
+    will-change: transform, width, height, border-radius;
+    transition: none !important;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+@keyframes successReturn {
+    0% {
+        transform: translate(var(--tx-center), var(--ty-center)) scale(1.2);
+        width: min(90vw, 380px); /* Match end state of journey */
+        height: 72px;
+        border-radius: 1rem;
+        background-color: #0f766e;
+    }
+    100% {
+        transform: translate(0, 0) scale(1);
+        width: var(--btn-w);
+        height: var(--btn-h);
+        border-radius: 3rem; 
+        background-color: #0f172a;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    }
+}
+
+/* Toast */
+.toast-enter { animation: toastSlideIn 0.6s var(--ease-out-quint) forwards; }
+@keyframes toastSlideIn {
+    0% { opacity: 0; transform: translateY(-150%) scale(0.9); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
