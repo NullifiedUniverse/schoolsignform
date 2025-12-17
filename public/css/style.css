@@ -1,7 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Serif+TC:wght@400;700&display=swap');
 
 :root {
-    --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.1);
+    --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Bouncy Entry */
+    --ease-squish: cubic-bezier(0.5, -0.6, 0.1, 1.6); /* For recoil effects */
     --ease-smooth: cubic-bezier(0.4, 0.0, 0.2, 1);
 }
 
@@ -13,7 +14,7 @@ body {
     background-attachment: fixed;
     -webkit-font-smoothing: antialiased;
     position: relative;
-    overflow-x: hidden; /* Prevent scroll during animations */
+    overflow-x: hidden;
 }
 
 body::before {
@@ -32,28 +33,24 @@ body::before {
 
 canvas { touch-action: none; }
 
-/* --- Optimized Staggered Entry --- */
-@keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(20px); filter: blur(4px); }
-    to { opacity: 1; transform: translateY(0); filter: blur(0); }
+/* --- Physics-Based Entry --- */
+@keyframes springUp {
+    0% { opacity: 0; transform: translateY(60px) scale(0.9); filter: blur(10px); }
+    100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
 }
 
-.stagger-1 { animation: fadeInUp 0.6s var(--ease-smooth) 0.05s backwards; }
-.stagger-2 { animation: fadeInUp 0.6s var(--ease-smooth) 0.1s backwards; }
-.stagger-3 { animation: fadeInUp 0.6s var(--ease-smooth) 0.15s backwards; }
-.stagger-4 { animation: fadeInUp 0.6s var(--ease-smooth) 0.2s backwards; }
-.stagger-5 { animation: fadeInUp 0.6s var(--ease-smooth) 0.25s backwards; }
-.stagger-6 { animation: fadeInUp 0.6s var(--ease-smooth) 0.3s backwards; }
+.stagger-1 { animation: springUp 1.0s var(--ease-spring) 0.1s backwards; }
+.stagger-2 { animation: springUp 1.0s var(--ease-spring) 0.15s backwards; }
+.stagger-3 { animation: springUp 1.0s var(--ease-spring) 0.2s backwards; }
+.stagger-4 { animation: springUp 1.0s var(--ease-spring) 0.25s backwards; }
+.stagger-5 { animation: springUp 1.0s var(--ease-spring) 0.3s backwards; }
+.stagger-6 { animation: springUp 1.0s var(--ease-spring) 0.35s backwards; }
 
 /* --- Main Card --- */
 .animate-bento {
-    animation: cardEntrance 0.8s var(--ease-spring) backwards;
-    transform-origin: center top;
-}
-
-@keyframes cardEntrance {
-    from { opacity: 0; transform: scale(0.95) translateY(30px); }
-    to { opacity: 1; transform: scale(1) translateY(0); }
+    animation: springUp 1.2s var(--ease-spring) backwards;
+    transform-origin: center center;
+    will-change: transform, opacity;
 }
 
 /* --- Form Inputs --- */
@@ -67,14 +64,16 @@ canvas { touch-action: none; }
     padding: 1rem 1rem 0.5rem;
     font-size: 1.1rem;
     color: #334155;
-    transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+    transition: all 0.3s var(--ease-smooth);
     outline: none;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.01);
 }
 
 .input-field:focus {
     background: #ffffff;
     border-color: #0f766e;
-    box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.1);
+    box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.1), 0 4px 12px rgba(0,0,0,0.05);
+    transform: translateY(-2px);
 }
 
 .input-label {
@@ -87,7 +86,7 @@ canvas { touch-action: none; }
     text-transform: uppercase;
     letter-spacing: 0.05em;
     pointer-events: none;
-    transition: color 0.2s;
+    transition: all 0.3s var(--ease-smooth);
 }
 .input-field:focus + .input-label { color: #0f766e; }
 
@@ -100,44 +99,45 @@ canvas { touch-action: none; }
 }
 .checkbox-card input:checked + div { color: #0f766e; font-weight: 600; }
 
-/* --- Genie Morph Effect --- */
+/* --- Polished Genie Morph --- */
 .magic-morph {
-    animation: genieSuck 0.7s cubic-bezier(0.55, 0.055, 0.675, 0.19) forwards; /* Slightly longer for detail */
+    animation: genieMorph 0.8s cubic-bezier(0.65, 0, 0.35, 1) forwards;
     pointer-events: none;
     transform-origin: center center;
-    will-change: transform, opacity, border-radius, filter; /* Performance Hint */
+    will-change: transform, opacity, border-radius, filter;
 }
 
-@keyframes genieSuck {
+@keyframes genieMorph {
     0% {
         transform: translate(0, 0) scale(1);
         opacity: 1;
         border-radius: 1.5rem;
-        filter: blur(0px);
+        filter: blur(0);
     }
     40% {
-        /* Velocity Stretch: Rounder & Slight Blur */
-        transform: translate(calc(var(--tx) * 0.35), calc(var(--ty) * 0.35)) scale(0.75, 1.15);
+        /* Shape Morph Phase - Rounding & Slight Shrink */
+        /* Less directional pull, more blob-like morph */
+        transform: translate(calc(var(--tx) * 0.1), calc(var(--ty) * 0.1)) scale(0.92);
         opacity: 1;
         border-radius: 4rem; 
-        filter: blur(2px);
+        filter: blur(0.5px);
     }
     100% {
-        /* Vanish: Fully Round & Blurred */
-        transform: translate(var(--tx), var(--ty)) scale(0.02);
+        /* Velocity Phase - Snap to button */
+        transform: translate(var(--tx), var(--ty)) scale(0.05);
         opacity: 0;
         border-radius: 50%;
-        filter: blur(12px);
+        filter: blur(8px);
     }
 }
 
 .magic-morph-reverse {
-    animation: genieAppear 0.6s var(--ease-spring) forwards;
+    animation: genieReturn 0.8s var(--ease-spring) forwards;
 }
 
-@keyframes genieAppear {
+@keyframes genieReturn {
     0% {
-        transform: translate(var(--tx), var(--ty)) scale(0.1);
+        transform: translate(var(--tx), var(--ty)) scale(0.05);
         opacity: 0;
     }
     100% {
@@ -146,21 +146,39 @@ canvas { touch-action: none; }
     }
 }
 
-/* --- Reject Shake --- */
+/* --- Fake-out / Bounce Back (Failure Animation) --- */
 .magic-reject {
-    animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+    animation: genieBounceBack 0.9s var(--ease-squish) forwards;
+    transform-origin: center center;
 }
 
-@keyframes shake {
-    10%, 90% { transform: translate3d(-1px, 0, 0); }
-    20%, 80% { transform: translate3d(2px, 0, 0); }
-    30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
-    40%, 60% { transform: translate3d(4px, 0, 0); }
+@keyframes genieBounceBack {
+    0% { transform: translate(0,0) scale(1); border-radius: 1.5rem; }
+    25% { 
+        /* Start morphing towards destination... */
+        transform: translate(calc(var(--tx) * 0.15), calc(var(--ty) * 0.15)) scale(0.95); 
+        border-radius: 3rem;
+        filter: blur(1px);
+    }
+    40% {
+        /* HIT THE WALL - Compression */
+        transform: translate(calc(var(--tx) * 0.1), calc(var(--ty) * 0.1)) scale(1.05, 0.95);
+        border-radius: 2.5rem;
+        filter: blur(0);
+        box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.2), 0 0 30px rgba(239, 68, 68, 0.4); /* Red Error Glow */
+    }
+    60% {
+        /* Spring Back */
+        transform: translate(calc(var(--tx) * -0.02), calc(var(--ty) * -0.02)) scale(0.98, 1.02);
+        box-shadow: none;
+    }
+    80% { transform: translate(0,0) scale(1.01, 0.99); }
+    100% { transform: translate(0,0) scale(1); border-radius: 1.5rem; }
 }
 
-/* --- Success Journey (Button Morph) --- */
+/* --- Success Journey --- */
 .success-journey {
-    animation: successExpand 0.8s var(--ease-spring) forwards;
+    animation: successExpand 0.9s var(--ease-spring) forwards;
     z-index: 50;
     pointer-events: none;
 }
@@ -178,12 +196,12 @@ canvas { touch-action: none; }
         height: 72px;
         border-radius: 1rem;
         background-color: #0f766e;
-        box-shadow: 0 20px 50px -10px rgba(15, 118, 110, 0.5);
+        box-shadow: 0 20px 60px -10px rgba(15, 118, 110, 0.6);
     }
 }
 
 .success-return {
-    animation: successShrink 0.6s ease-in-out forwards;
+    animation: successShrink 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 @keyframes successShrink {
@@ -199,15 +217,15 @@ canvas { touch-action: none; }
         width: var(--btn-w);
         height: var(--btn-h);
         border-radius: 9999px;
-        background-color: #1e293b; /* Revert to Slate-800 */
+        background-color: #1e293b; 
     }
 }
 
-/* --- Toast Notification --- */
+/* Toast */
 .toast-enter {
-    animation: toastIn 0.4s var(--ease-spring) forwards;
+    animation: toastSpring 0.6s var(--ease-spring) forwards;
 }
-@keyframes toastIn {
-    from { opacity: 0; transform: translateY(-20px) translateX(-50%) scale(0.9); }
-    to { opacity: 1; transform: translateY(0) translateX(-50%) scale(1); }
+@keyframes toastSpring {
+    0% { opacity: 0; transform: translateY(-30px) translateX(-50%) scale(0.8); }
+    100% { opacity: 1; transform: translateY(0) translateX(-50%) scale(1); }
 }

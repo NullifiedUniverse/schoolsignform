@@ -69,13 +69,25 @@ window.clearPad = function(name) {
 
 function triggerReject() {
     const form = getEl('paper-container');
+    const btn = getEl('submit-btn');
     vibrate([50, 50, 50]);
+    
+    // Calculate Vector for Fakeout Direction
+    const fRect = form.getBoundingClientRect();
+    const bRect = btn.getBoundingClientRect();
+    const tx = (bRect.left + bRect.width/2) - (fRect.left + fRect.width/2);
+    const ty = (bRect.top + bRect.height/2) - (fRect.top + fRect.height/2);
+    
+    form.style.setProperty('--tx', `${tx}px`);
+    form.style.setProperty('--ty', `${ty}px`);
     
     form.classList.remove('animate-bento', 'magic-morph', 'magic-reject');
     void form.offsetWidth; // Force Reflow
     form.classList.add('magic-reject');
     
-    setTimeout(() => form.classList.remove('magic-reject'), 500);
+    setTimeout(() => {
+        form.classList.remove('magic-reject');
+    }, 900);
 }
 
 function resetFormState() {
@@ -225,14 +237,17 @@ window.submitToServer = async function() {
 
     } catch (err) {
         console.error(err);
-        triggerReject();
+        triggerReject(); // Trigger the bounce-back animation
         showToast("❌ Error", "Upload failed.");
         
         // Recover UI
         const form = getEl('paper-container');
-        form.classList.remove('magic-morph');
-        form.style.opacity = '1';
-        form.style.transform = 'none';
+        // If we failed mid-morph, ensure we reset properly after the bounce finishes
+        setTimeout(() => {
+             form.classList.remove('magic-morph');
+             form.style.opacity = '1';
+             form.style.transform = 'none';
+        }, 800);
         
         btn.disabled = false;
         btn.innerHTML = originalBtn;
