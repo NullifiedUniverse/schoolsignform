@@ -1,10 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Serif+TC:wght@400;700&display=swap');
 
 body {
-    background-color: #f3f4f6;
+    background-color: #0f172a; /* Dark Grey / Slate 900 */
     background-image: 
-        radial-gradient(at 0% 0%, rgba(15, 118, 110, 0.05) 0px, transparent 50%),
-        radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.05) 0px, transparent 50%);
+        radial-gradient(at 0% 0%, rgba(15, 118, 110, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.15) 0px, transparent 50%);
     background-attachment: fixed;
     -webkit-font-smoothing: antialiased;
     position: relative; /* For pseudo-element positioning */
@@ -19,11 +19,16 @@ body::before {
     height: 100%;
     pointer-events: none;
     z-index: 0; /* Behind content, above background */
-    opacity: 0.4;
-    background-image: url("data:image/svg+xml,%3Csvg width='300' height='300' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='50%25' y='50%25' font-family='Inter, sans-serif' font-weight='700' font-size='20' fill='%2394a3b8' opacity='0.08' transform='rotate(-45 150 150)' text-anchor='middle' dominant-baseline='middle'%3ENullifiedGalaxy%3C/text%3E%3C/svg%3E");
+    opacity: 0.1; /* Adjusted for dark mode visibility */
+    background-image: url("data:image/svg+xml,%3Csvg width='300' height='300' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='50%25' y='50%25' font-family='Inter, sans-serif' font-weight='700' font-size='20' fill='%23ffffff' opacity='0.3' transform='rotate(-45 150 150)' text-anchor='middle' dominant-baseline='middle'%3ENullifiedGalaxy%3C/text%3E%3C/svg%3E");
     background-repeat: repeat;
     mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
     -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+    mix-blend-mode: overlay;
+}
+
+canvas {
+    touch-action: none; /* Critical for high-performance pointer events */
 }
 
 /* --- Animations --- */
@@ -107,23 +112,33 @@ body::before {
 @keyframes genieReject {
     0% {
         transform: translate(0, 0) scale(1) rotate(0deg);
+        box-shadow: 0 10px 40px -10px rgba(0,0,0,0.1); /* Original shadow */
+        border-color: rgba(255, 255, 255, 0.5);
     }
     30% {
-        /* Move 20% towards the button */
+        /* Move towards button + Red Glow */
         transform: translate(calc(var(--tx) * 0.2), calc(var(--ty) * 0.2)) scale(0.95) rotate(-3deg);
         filter: brightness(0.9);
+        box-shadow: 0 0 30px rgba(239, 68, 68, 0.6); /* Red */
+        border-color: rgba(239, 68, 68, 0.8);
     }
     45% {
-        /* Shake / Glitch */
+        /* Shake + White Flash */
         transform: translate(calc(var(--tx) * 0.2), calc(var(--ty) * 0.2)) scale(0.95) rotate(3deg);
+        box-shadow: 0 0 50px rgba(255, 255, 255, 0.8); /* White */
+        border-color: #ffffff;
     }
     60% {
         transform: translate(calc(var(--tx) * 0.2), calc(var(--ty) * 0.2)) scale(0.95) rotate(-2deg);
+        box-shadow: 0 0 30px rgba(15, 118, 110, 0.6); /* Greenish return */
+        border-color: rgba(15, 118, 110, 0.8);
     }
     100% {
         /* Snap back */
         transform: translate(0, 0) scale(1) rotate(0deg);
         filter: brightness(1);
+        box-shadow: 0 10px 40px -10px rgba(0,0,0,0.1);
+        border-color: rgba(255, 255, 255, 0.5);
     }
 }
 
@@ -187,9 +202,9 @@ body::before {
 
 /* Toast */
 .toast-enter {
-    animation: toastPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    animation: toastSlideIn 0.5s cubic-bezier(0.19, 1, 0.22, 1) forwards;
 }
-@keyframes toastPop {
-    0% { opacity: 0; transform: translateY(-20px) scale(0.9); }
+@keyframes toastSlideIn {
+    0% { opacity: 0; transform: translateY(-150%) scale(0.9); }
     100% { opacity: 1; transform: translateY(0) scale(1); }
 }
