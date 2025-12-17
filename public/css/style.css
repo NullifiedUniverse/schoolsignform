@@ -102,10 +102,10 @@ canvas { touch-action: none; }
 
 /* --- Genie Morph Effect --- */
 .magic-morph {
-    animation: genieSuck 0.6s cubic-bezier(0.55, 0.055, 0.675, 0.19) forwards; /* Ease In Cubic */
+    animation: genieSuck 0.7s cubic-bezier(0.55, 0.055, 0.675, 0.19) forwards; /* Slightly longer for detail */
     pointer-events: none;
     transform-origin: center center;
-    will-change: transform, opacity, border-radius;
+    will-change: transform, opacity, border-radius, filter; /* Performance Hint */
 }
 
 @keyframes genieSuck {
@@ -113,17 +113,21 @@ canvas { touch-action: none; }
         transform: translate(0, 0) scale(1);
         opacity: 1;
         border-radius: 1.5rem;
+        filter: blur(0px);
     }
     40% {
-        /* Velocity Stretch towards target */
-        transform: translate(calc(var(--tx) * 0.3), calc(var(--ty) * 0.3)) scale(0.8, 1.1);
+        /* Velocity Stretch: Rounder & Slight Blur */
+        transform: translate(calc(var(--tx) * 0.35), calc(var(--ty) * 0.35)) scale(0.75, 1.15);
         opacity: 1;
-        border-radius: 3rem;
+        border-radius: 4rem; 
+        filter: blur(2px);
     }
     100% {
-        transform: translate(var(--tx), var(--ty)) scale(0.1);
+        /* Vanish: Fully Round & Blurred */
+        transform: translate(var(--tx), var(--ty)) scale(0.02);
         opacity: 0;
         border-radius: 50%;
+        filter: blur(12px);
     }
 }
 

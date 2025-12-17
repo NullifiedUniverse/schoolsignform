@@ -183,6 +183,9 @@ window.submitToServer = async function() {
 
         if (!res.ok) throw new Error('Upload failed');
 
+        // SLIGHT PAUSE requested by user
+        await new Promise(r => setTimeout(r, 400));
+
         // 6. Success Animation
         vibrate([50, 100, 50]);
         
