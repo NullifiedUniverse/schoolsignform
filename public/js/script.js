@@ -153,6 +153,25 @@ async function submitToServer() {
 
         const base64Image = canvas.toDataURL("image/png");
 
+        // --- TRIGGER MAGIC LAMP ANIMATION ---
+        // 1. Calculate Geometry
+        const formRect = element.getBoundingClientRect();
+        const btnRect = btn.getBoundingClientRect();
+        
+        const formCenterX = formRect.left + formRect.width / 2;
+        const formCenterY = formRect.top + formRect.height / 2;
+        const btnCenterX = btnRect.left + btnRect.width / 2;
+        const btnCenterY = btnRect.top + btnRect.height / 2;
+
+        const tx = btnCenterX - formCenterX;
+        const ty = btnCenterY - formCenterY;
+
+        // 2. Set Trajectory & Animate
+        element.style.setProperty('--tx', `${tx}px`);
+        element.style.setProperty('--ty', `${ty}px`);
+        element.classList.remove('animate-bento', 'magic-morph-reverse'); // Clear prev animations
+        element.classList.add('magic-morph');
+
         const response = await fetch('/api/upload', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -165,7 +184,7 @@ async function submitToServer() {
 
         if (response.ok) {
             showToast("✅ Success", "Document uploaded securely.");
-            // Optional: Redirect or disable form
+            // Keep form hidden (morphed) to indicate finality
         } else {
             throw new Error('Server upload failed');
         }
@@ -173,6 +192,12 @@ async function submitToServer() {
     } catch (err) {
         console.error(err);
         showToast("❌ Error", "Upload failed. Please try again.");
+        
+        // Reverse Animation on Error
+        const element = document.getElementById('paper-container');
+        element.classList.remove('magic-morph');
+        element.classList.add('magic-morph-reverse');
+        
     } finally {
         btn.disabled = false;
         btn.innerHTML = originalContent;
