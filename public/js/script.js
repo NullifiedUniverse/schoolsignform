@@ -118,8 +118,11 @@ async function submitToServer() {
                         input.style.borderBottom = '2px solid #333';
                         input.style.borderRadius = '0';
                         input.style.color = '#000';
-                        input.style.padding = '24px 0 6px 0'; // Create space for label
+                        input.style.padding = '20px 0 8px 0'; // Adjusted padding
+                        input.style.lineHeight = '1.5'; // Fix line height
                         input.style.height = 'auto';
+                        input.style.minHeight = '50px'; // Ensure sufficient height
+                        input.style.boxSizing = 'border-box';
                         input.style.fontSize = '16px';
                         input.style.width = '100%';
                         input.style.boxShadow = 'none';
