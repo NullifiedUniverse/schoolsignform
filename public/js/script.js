@@ -81,13 +81,19 @@ function triggerReject() {
     form.style.setProperty('--tx', `${tx}px`);
     form.style.setProperty('--ty', `${ty}px`);
     
-    form.classList.remove('animate-bento', 'magic-morph', 'magic-reject');
+    form.classList.remove('animate-bento', 'magic-morph', 'magic-morph-reverse', 'magic-reject');
     void form.offsetWidth; // Force Reflow
     form.classList.add('magic-reject');
     
     setTimeout(() => {
         form.classList.remove('magic-reject');
-    }, 900);
+        // Ensure styles are explicitly reset by animation for a clean slate
+        form.style.removeProperty('transform');
+        form.style.removeProperty('filter'); 
+        form.style.removeProperty('opacity');
+        form.style.removeProperty('border-radius');
+        form.style.removeProperty('box-shadow');
+    }, 1000); // Match genieBounceBack duration (1s)
 }
 
 function resetFormState() {
@@ -203,8 +209,13 @@ window.submitToServer = async function() {
         
         // Setup Button Morph
         const finalRect = btn.getBoundingClientRect();
-        const cx = (window.innerWidth/2) - (finalRect.left + finalRect.width/2);
-        const cy = (window.innerHeight/2) - (finalRect.top + finalRect.height/2);
+        // Calculate center of the screen, adjusted for new target size
+        const targetWidth = Math.min(window.innerWidth * 0.9, 500); // Use the new larger target
+        const targetHeight = 72; // Keep height consistent
+        
+        // Corrected centering calculation for the expanded toast
+        const cx = (window.innerWidth / 2) - (finalRect.left + finalRect.width / 2) - ((targetWidth - finalRect.width) / 2);
+        const cy = (window.innerHeight / 2) - (finalRect.top + finalRect.height / 2) - ((targetHeight - finalRect.height) / 2);
         
         btn.style.setProperty('--btn-w', `${finalRect.width}px`);
         btn.style.setProperty('--btn-h', `${finalRect.height}px`);
@@ -240,18 +251,16 @@ window.submitToServer = async function() {
         triggerReject(); // Trigger the bounce-back animation
         showToast("❌ Error", "Upload failed.");
         
-        // Recover UI
-        const form = getEl('paper-container');
-        // If we failed mid-morph, ensure we reset properly after the bounce finishes
+        // Recover UI - This setTimeout should match the bounce-back animation duration
         setTimeout(() => {
-             form.classList.remove('magic-morph');
-             form.style.opacity = '1';
-             form.style.transform = 'none';
-        }, 800);
+             // genieBounceBack already ensures styles are reset
+             // No explicit opacity/transform needed here as the animation handles it
+             // but ensure isSubmitting is false
+             APP.isSubmitting = false;
+        }, 1000); // Matching genieBounceBack duration (1s)
         
         btn.disabled = false;
         btn.innerHTML = originalBtn;
-        APP.isSubmitting = false;
     }
 };
 

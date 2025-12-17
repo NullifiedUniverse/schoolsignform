@@ -146,36 +146,6 @@ canvas { touch-action: none; }
     }
 }
 
-/* --- Fake-out / Bounce Back (Failure Animation) --- */
-.magic-reject {
-    animation: genieBounceBack 0.9s var(--ease-squish) forwards;
-    transform-origin: center center;
-}
-
-@keyframes genieBounceBack {
-    0% { transform: translate(0,0) scale(1); border-radius: 1.5rem; }
-    25% { 
-        /* Start morphing towards destination... */
-        transform: translate(calc(var(--tx) * 0.15), calc(var(--ty) * 0.15)) scale(0.95); 
-        border-radius: 3rem;
-        filter: blur(1px);
-    }
-    40% {
-        /* HIT THE WALL - Compression */
-        transform: translate(calc(var(--tx) * 0.1), calc(var(--ty) * 0.1)) scale(1.05, 0.95);
-        border-radius: 2.5rem;
-        filter: blur(0);
-        box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.2), 0 0 30px rgba(239, 68, 68, 0.4); /* Red Error Glow */
-    }
-    60% {
-        /* Spring Back */
-        transform: translate(calc(var(--tx) * -0.02), calc(var(--ty) * -0.02)) scale(0.98, 1.02);
-        box-shadow: none;
-    }
-    80% { transform: translate(0,0) scale(1.01, 0.99); }
-    100% { transform: translate(0,0) scale(1); border-radius: 1.5rem; }
-}
-
 /* --- Success Journey --- */
 .success-journey {
     animation: successExpand 0.9s var(--ease-spring) forwards;
@@ -192,7 +162,7 @@ canvas { touch-action: none; }
     }
     100% {
         transform: translate(var(--tx-center), var(--ty-center));
-        width: min(90vw, 380px);
+        width: min(90vw, 500px); /* Larger toast */
         height: 72px;
         border-radius: 1rem;
         background-color: #0f766e;
@@ -207,7 +177,7 @@ canvas { touch-action: none; }
 @keyframes successShrink {
     0% {
         transform: translate(var(--tx-center), var(--ty-center));
-        width: min(90vw, 380px);
+        width: min(90vw, 500px);
         height: 72px;
         border-radius: 1rem;
         background-color: #0f766e;
@@ -218,6 +188,42 @@ canvas { touch-action: none; }
         height: var(--btn-h);
         border-radius: 9999px;
         background-color: #1e293b; 
+    }
+}
+
+/* --- Fake-out / Bounce Back (Failure Animation) --- */
+.magic-reject {
+    animation: genieBounceBack 1s cubic-bezier(0.5, -0.2, 0.1, 1.2) forwards; /* Softer bounce ease */
+    transform-origin: center center;
+}
+
+@keyframes genieBounceBack {
+    0% { transform: translate(0,0) scale(1); border-radius: 1.5rem; filter: blur(0); opacity: 1; }
+    20% { 
+        /* Start morphing towards destination... */
+        transform: translate(calc(var(--tx) * 0.1), calc(var(--ty) * 0.1)) scale(0.98); 
+        border-radius: 3rem;
+        filter: blur(0.5px);
+        opacity: 1;
+    }
+    40% {
+        /* HIT THE WALL - Compression and Red Alert */
+        transform: translate(calc(var(--tx) * 0.05), calc(var(--ty) * 0.05)) scale(1.02, 0.95); /* Softer Squish */
+        border-radius: 2.5rem;
+        filter: blur(0);
+        box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.3), 0 0 30px rgba(239, 68, 68, 0.6); /* Clearer Red Glow */
+        opacity: 1;
+    }
+    60% {
+        /* Spring Back - Overshoot */
+        transform: translate(calc(var(--tx) * -0.01), calc(var(--ty) * -0.01)) scale(0.99, 1.01);
+        box-shadow: none;
+        filter: blur(0);
+        opacity: 1;
+    }
+    100% { 
+        transform: translate(0,0) scale(1); border-radius: 1.5rem; filter: blur(0); opacity: 1;
+        box-shadow: 0 10px 40px -10px rgba(0,0,0,0.1);
     }
 }
 
