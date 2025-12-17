@@ -98,6 +98,35 @@ body::before {
     }
 }
 
+/* --- Reject / Glitch Effect --- */
+.magic-reject {
+    animation: genieReject 0.8s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+    transform-origin: center center;
+}
+
+@keyframes genieReject {
+    0% {
+        transform: translate(0, 0) scale(1) rotate(0deg);
+    }
+    30% {
+        /* Move 20% towards the button */
+        transform: translate(calc(var(--tx) * 0.2), calc(var(--ty) * 0.2)) scale(0.95) rotate(-3deg);
+        filter: brightness(0.9);
+    }
+    45% {
+        /* Shake / Glitch */
+        transform: translate(calc(var(--tx) * 0.2), calc(var(--ty) * 0.2)) scale(0.95) rotate(3deg);
+    }
+    60% {
+        transform: translate(calc(var(--tx) * 0.2), calc(var(--ty) * 0.2)) scale(0.95) rotate(-2deg);
+    }
+    100% {
+        /* Snap back */
+        transform: translate(0, 0) scale(1) rotate(0deg);
+        filter: brightness(1);
+    }
+}
+
 .delay-100 { animation-delay: 100ms; }
 .delay-200 { animation-delay: 200ms; }
 .delay-300 { animation-delay: 300ms; }

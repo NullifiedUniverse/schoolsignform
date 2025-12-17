@@ -78,10 +78,12 @@ async function submitToServer() {
     const sigParent = window.pads['parent'];
 
     if (!studentName || !studentId || !parentName) {
+        triggerRejectAnimation();
         showToast("⚠️ Missing Information", "Please fill in all name and ID fields.");
         return;
     }
     if (sigStudent.isEmpty() || sigParent.isEmpty()) {
+        triggerRejectAnimation();
         showToast("⚠️ Missing Signatures", "Both Student and Parent must sign.");
         return;
     }
@@ -235,3 +237,33 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('auto-month').textContent = (now.getMonth() + 1).toString().padStart(2, '0');
     document.getElementById('auto-day').textContent = now.getDate().toString().padStart(2, '0');
 });
+
+function triggerRejectAnimation() {
+    const element = document.getElementById('paper-container');
+    const btn = document.getElementById('submit-btn');
+    
+    // Calculate Geometry (Same as submit)
+    const formRect = element.getBoundingClientRect();
+    const btnRect = btn.getBoundingClientRect();
+    
+    const formCenterX = formRect.left + formRect.width / 2;
+    const formCenterY = formRect.top + formRect.height / 2;
+    const btnCenterX = btnRect.left + btnRect.width / 2;
+    const btnCenterY = btnRect.top + btnRect.height / 2;
+
+    const tx = btnCenterX - formCenterX;
+    const ty = btnCenterY - formCenterY;
+
+    // Set variables and trigger
+    element.style.setProperty('--tx', `${tx}px`);
+    element.style.setProperty('--ty', `${ty}px`);
+    
+    element.classList.remove('animate-bento'); // Stop entrance anim if still playing
+    element.classList.remove('magic-reject'); // Reset if spamming
+    void element.offsetWidth; // Force reflow
+    element.classList.add('magic-reject');
+
+    setTimeout(() => {
+        element.classList.remove('magic-reject');
+    }, 800);
+}
