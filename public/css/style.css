@@ -7,8 +7,8 @@
 }
 
 body {
-    background-color: #0f172a; 
-    background-image: 
+    background-color: #0f172a;
+    background-image:
         radial-gradient(at 0% 0%, rgba(15, 118, 110, 0.15) 0px, transparent 50%),
         radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.15) 0px, transparent 50%);
     background-attachment: fixed;
@@ -31,20 +31,54 @@ body::before {
     mix-blend-mode: overlay;
 }
 
-canvas { touch-action: none; }
+canvas {
+    touch-action: none;
+}
 
 /* --- Optimized Staggered Entry --- */
 @keyframes springUp {
-    0% { opacity: 0; transform: translateY(60px) scale(0.9); filter: blur(10px); }
-    100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+    0% {
+        opacity: 0;
+        transform: translateY(60px) scale(0.9);
+        filter: blur(10px);
+    }
+
+    60% {
+        opacity: 1;
+        transform: translateY(-5px) scale(1.02);
+        filter: blur(0);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+    }
 }
 
-.stagger-1 { animation: springUp 1.0s var(--ease-spring) 0.1s backwards; }
-.stagger-2 { animation: springUp 1.0s var(--ease-spring) 0.15s backwards; }
-.stagger-3 { animation: springUp 1.0s var(--ease-spring) 0.2s backwards; }
-.stagger-4 { animation: springUp 1.0s var(--ease-spring) 0.25s backwards; }
-.stagger-5 { animation: springUp 1.0s var(--ease-spring) 0.3s backwards; }
-.stagger-6 { animation: springUp 1.0s var(--ease-spring) 0.35s backwards; }
+.stagger-1 {
+    animation: springUp 1.0s var(--ease-spring) 0.1s backwards;
+}
+
+.stagger-2 {
+    animation: springUp 1.0s var(--ease-spring) 0.15s backwards;
+}
+
+.stagger-3 {
+    animation: springUp 1.0s var(--ease-spring) 0.2s backwards;
+}
+
+.stagger-4 {
+    animation: springUp 1.0s var(--ease-spring) 0.25s backwards;
+}
+
+.stagger-5 {
+    animation: springUp 1.0s var(--ease-spring) 0.3s backwards;
+}
+
+.stagger-6 {
+    animation: springUp 1.0s var(--ease-spring) 0.35s backwards;
+}
 
 /* --- Main Card --- */
 .animate-bento {
@@ -54,11 +88,14 @@ canvas { touch-action: none; }
 }
 
 /* --- Form Inputs --- */
-.input-group { position: relative; }
+.input-group {
+    position: relative;
+}
 
 .input-field {
     width: 100%;
-    background: #f1f5f9; /* Toned down from f8fafc */
+    background: #f1f5f9;
+    /* Toned down from f8fafc */
     border: 1px solid #e2e8f0;
     border-radius: 0.75rem;
     padding: 1rem 1rem 0.5rem;
@@ -66,13 +103,14 @@ canvas { touch-action: none; }
     color: #334155;
     transition: all 0.3s var(--ease-smooth);
     outline: none;
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.01);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.01);
 }
 
 .input-field:focus {
-    background: #ffffff; /* White only on focus */
+    background: #ffffff;
+    /* White only on focus */
     border-color: #0f766e;
-    box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.1), 0 4px 12px rgba(0,0,0,0.05);
+    box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.1), 0 4px 12px rgba(0, 0, 0, 0.05);
     transform: translateY(-2px);
 }
 
@@ -88,111 +126,176 @@ canvas { touch-action: none; }
     pointer-events: none;
     transition: all 0.3s var(--ease-smooth);
 }
-.input-field:focus + .input-label { color: #0f766e; }
+
+.input-field:focus+.input-label {
+    color: #0f766e;
+}
 
 .checkbox-card {
-    background: #f8fafc; /* Toned down from white */
-    border: 1px solid #e2e8f0; border-radius: 0.75rem; transition: all 0.2s ease;
+    background: #f8fafc;
+    /* Toned down from white */
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    transition: all 0.2s ease;
 }
+
 .checkbox-card:hover {
-    border-color: #0f766e; background: #f0fdfa; transform: translateY(-1px);
-    box-shadow: 0 4px 12px -2px rgba(15, 118, 110, 0.08); /* Tinted shadow */
+    border-color: #0f766e;
+    background: #f0fdfa;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px -2px rgba(15, 118, 110, 0.08);
+    /* Tinted shadow */
 }
-.checkbox-card input:checked + div { color: #0f766e; font-weight: 600; }
+
+.checkbox-card input:checked+div {
+    color: #0f766e;
+    font-weight: 600;
+}
 
 /* --- Polished Genie Morph --- */
-.magic-morph {
-    animation: genieMorph 0.8s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+/* --- Liquid Genie 2.0 (The Orb Vacuum) --- */
+.state-vacuum {
+    /* Custom ease: Starts slow, extreme acceleration in middle, snaps at end */
+    animation: liquidVacuum 0.9s cubic-bezier(0.6, 0.05, 0.01, 0.99) forwards;
     pointer-events: none;
     transform-origin: center center;
-    will-change: transform, opacity, border-radius, filter;
+    will-change: transform, opacity, filter, border-radius;
 }
 
-@keyframes genieMorph {
+@keyframes liquidVacuum {
     0% {
         transform: translate(0, 0) scale(1);
         opacity: 1;
         border-radius: 1.5rem;
         filter: blur(0);
+        box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.1);
     }
-    40% {
-        transform: translate(calc(var(--tx) * 0.1), calc(var(--ty) * 0.1)) scale(0.92);
+
+    30% {
+        /* Anticipation: Pull back slightly and start rounding */
+        transform: translate(calc(var(--tx) * 0.05), calc(var(--ty) * 0.05)) scale(0.95);
+        border-radius: 3rem;
+        filter: blur(0px);
         opacity: 1;
-        border-radius: 4rem; 
-        filter: blur(2px); /* Increased intermediate blur */
     }
+
+    60% {
+        /* The Travel: Shrink uniformly (Maintain Aspect Ratio) into a "Pearl" */
+        transform: translate(calc(var(--tx) * 0.6), calc(var(--ty) * 0.6)) scale(0.3);
+        border-radius: 8rem;
+        /* Turn into a capsule/circle */
+        filter: blur(8px);
+        /* Heavy motion blur implies speed */
+        opacity: 0.8;
+    }
+
     100% {
-        transform: translate(var(--tx), var(--ty)) scale(0.05);
-        opacity: 0;
+        /* Absorption */
+        transform: translate(var(--tx), var(--ty)) scale(0.01);
         border-radius: 50%;
-        filter: blur(15px); /* Stronger final blur */
-    }
-}
-
-.magic-morph-reverse {
-    animation: genieReturn 0.8s var(--ease-spring) forwards;
-}
-
-@keyframes genieReturn {
-    0% {
-        transform: translate(var(--tx), var(--ty)) scale(0.05);
+        filter: blur(20px);
         opacity: 0;
     }
+}
+
+.state-appear {
+    animation: liquidAppear 0.8s var(--ease-spring) forwards;
+}
+
+@keyframes liquidAppear {
+    0% {
+        transform: translate(var(--tx), var(--ty)) scale(0);
+        opacity: 0;
+    }
+
     100% {
         transform: translate(0, 0) scale(1);
         opacity: 1;
     }
 }
 
-/* --- Fake-out / Bounce Back --- */
-.magic-reject {
-    animation: genieBounceBack 1s cubic-bezier(0.5, -0.2, 0.1, 1.2) forwards;
+/* --- Elastic Reject (Rubber Band) --- */
+.state-elastic {
+    animation: elasticReject 0.9s linear forwards;
+    /* Linear because keyframes handle physics */
     transform-origin: center center;
-    will-change: transform;
 }
 
-@keyframes genieBounceBack {
-    0% { transform: translate(0,0) scale(1); border-radius: 1.5rem; filter: blur(0); opacity: 1; }
-    20% { 
-        transform: translate(calc(var(--tx) * 0.1), calc(var(--ty) * 0.1)) scale(0.98); 
-        border-radius: 3rem;
-        filter: blur(2px); /* Subtle blur for movement */
-        opacity: 1;
+@keyframes elasticReject {
+    0% {
+        transform: translate(0, 0) rotate(0);
     }
-    40% {
-        transform: translate(calc(var(--tx) * 0.05), calc(var(--ty) * 0.05)) scale(1.02, 0.95);
-        border-radius: 2.5rem;
-        filter: blur(3px); /* Stronger blur at impact */
-        box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.3), 0 0 40px rgba(239, 68, 68, 0.8); /* Stronger glow */
-        opacity: 1;
+
+    15% {
+        transform: translate(calc(var(--tx) * 0.15), calc(var(--ty) * 0.15)) rotate(2deg);
     }
+
+    /* Pull */
+    30% {
+        transform: translate(calc(var(--tx) * -0.05), calc(var(--ty) * -0.05)) rotate(-2deg);
+    }
+
+    /* Snap Back */
+    45% {
+        transform: translate(calc(var(--tx) * 0.025), calc(var(--ty) * 0.025)) rotate(1deg);
+    }
+
+    /* Damping 1 */
     60% {
-        transform: translate(calc(var(--tx) * -0.01), calc(var(--ty) * -0.01)) scale(0.99, 1.01);
-        box-shadow: none;
-        filter: blur(1px); /* Fading blur */
-        opacity: 1;
+        transform: translate(0, 0) rotate(0);
     }
-    100% { 
-        transform: translate(0,0) scale(1); border-radius: 1.5rem; filter: blur(0); opacity: 1;
-        box-shadow: 0 10px 40px -10px rgba(0,0,0,0.1);
+
+    100% {
+        transform: translate(0, 0) rotate(0);
     }
 }
 
-/* --- Success Journey --- */
+/* --- Button Interactions --- */
+
+/* 1. The Gulp (Reaction to absorption) */
+.button-gulp {
+    animation: buttonGulp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes buttonGulp {
+    0% {
+        transform: scale(1);
+    }
+
+    40% {
+        transform: scale(0.9);
+        background-color: #0d9488;
+    }
+
+    /* Gulp */
+    100% {
+        transform: scale(1);
+        background-color: #0f766e;
+    }
+}
+
+/* 2. Success Expansion (Progressive Morph) */
 .success-journey {
-    animation: successExpand 0.9s var(--ease-spring) forwards;
+    animation: barExpand 1.0s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
     z-index: 50;
-    pointer-events: none;
     will-change: transform, width, height, border-radius;
 }
 
-@keyframes successExpand {
+@keyframes barExpand {
     0% {
         transform: translate(0, 0);
         width: var(--btn-w);
         height: var(--btn-h);
         border-radius: var(--btn-radius-start, 9999px);
+        box-shadow: 0 0 0 rgba(15, 118, 110, 0);
     }
+
+    60% {
+        /* Overshoot slightly */
+        width: min(92vw, 510px);
+        height: 76px;
+    }
+
     100% {
         transform: translate(var(--tx-center), var(--ty-center));
         width: min(90vw, 500px);
@@ -204,7 +307,7 @@ canvas { touch-action: none; }
 }
 
 .success-return {
-    animation: successShrink 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    animation: successShrink 0.8s cubic-bezier(0.5, 0, 0.1, 1) forwards;
     will-change: transform, width, height, border-radius;
 }
 
@@ -216,12 +319,19 @@ canvas { touch-action: none; }
         border-radius: 1rem;
         background-color: #0f766e;
     }
+
+    40% {
+        /* Squeeze before shrinking */
+        transform: translate(var(--tx-center), var(--ty-center)) scale(0.95);
+        border-radius: 2rem;
+    }
+
     100% {
         transform: translate(0, 0);
         width: var(--btn-w);
         height: var(--btn-h);
         border-radius: 9999px;
-        background-color: #1e293b; 
+        background-color: #1e293b;
     }
 }
 
@@ -229,7 +339,15 @@ canvas { touch-action: none; }
 .toast-enter {
     animation: toastSpring 0.6s var(--ease-spring) forwards;
 }
+
 @keyframes toastSpring {
-    0% { opacity: 0; transform: translateY(-30px) translateX(-50%) scale(0.8); }
-    100% { opacity: 1; transform: translateY(0) translateX(-50%) scale(1); }
+    0% {
+        opacity: 0;
+        transform: translateY(-30px) translateX(-50%) scale(0.8);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) translateX(-50%) scale(1);
+    }
 }
