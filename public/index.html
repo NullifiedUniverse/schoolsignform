@@ -41,9 +41,9 @@
         
         <!-- Header -->
         <header class="text-center mb-10 border-b-2 border-slate-100 pb-8 stagger-1">
-            <div class="inline-block px-4 py-1 rounded-full bg-teal-50 text-teal-700 text-sm font-bold tracking-widest mb-3 font-sans uppercase">Official Document</div>
+            <div class="inline-block px-4 py-1 rounded-full bg-teal-50 text-teal-700 text-sm font-bold tracking-widest mb-3 font-sans uppercase">正式文件</div>
             <h1 class="text-3xl md:text-4xl font-bold text-slate-800 mb-2">出國證件自帶切結書</h1>
-            <p class="text-slate-500 text-lg">Travel Document Responsibility Agreement</p>
+            <p class="text-slate-500 text-lg">出國證件責任切結書</p>
         </header>
 
         <div class="space-y-8">
@@ -53,7 +53,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                 </svg>
                 <div>
-                    <span class="block text-xs font-bold uppercase tracking-wider text-slate-400 font-sans">Organization / School</span>
+                    <span class="block text-xs font-bold uppercase tracking-wider text-slate-400 font-sans">組織 / 學校</span>
                     <span class="font-bold text-lg">康橋國際學校 林口校區</span>
                 </div>
             </div>
@@ -62,18 +62,18 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 stagger-3">
                 <div class="input-group">
                     <input type="text" id="student-name" class="input-field pt-6" placeholder=" " required maxlength="20">
-                    <label for="student-name" class="input-label">Student Name (學生姓名)</label>
+                    <label for="student-name" class="input-label">學生姓名</label>
                 </div>
                 <div class="input-group">
                     <input type="text" id="student-id" class="input-field pt-6" placeholder=" " required maxlength="15">
-                    <label for="student-id" class="input-label">Student ID (學號)</label>
+                    <label for="student-id" class="input-label">學號</label>
                 </div>
             </div>
 
             <!-- Parent Info -->
             <div class="input-group stagger-4">
                 <input type="text" id="parent-name" class="input-field pt-6" placeholder=" " required maxlength="20">
-                <label for="parent-name" class="input-label">Parent / Guardian Name (家長姓名)</label>
+                <label for="parent-name" class="input-label">家長 / 監護人姓名</label>
                 <div class="absolute right-4 top-4 text-slate-400 text-sm pointer-events-none hidden md:block">先生/小姐 (甲方)</div>
             </div>
 
@@ -117,22 +117,22 @@
                     <div class="flex justify-between items-center mb-4">
                         <span class="font-bold text-slate-800 flex items-center gap-2">
                             <span class="w-2 h-2 rounded-full bg-teal-500"></span>
-                            Student Signature
+                            學生簽名
                         </span>
                         <div class="flex gap-2">
                             <button id="btn-erase-student" onclick="toggleEraser('student')" class="text-xs font-bold text-slate-500 border border-slate-200 hover:bg-slate-50 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
                                     <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
                                 </svg>
-                                Eraser
+                                橡皮擦
                             </button>
-                            <button onclick="clearPad('student')" data-html2canvas-ignore class="text-xs font-bold text-red-500 border border-red-200 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-colors uppercase tracking-wider">Clear</button>
+                            <button onclick="clearPad('student')" data-html2canvas-ignore class="text-xs font-bold text-red-500 border border-red-200 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-colors uppercase tracking-wider">清除</button>
                         </div>
                     </div>
                     <div class="relative w-full h-40 bg-white rounded-xl border border-slate-200 shadow-inner overflow-hidden hover:border-teal-400 transition-colors">
                         <canvas id="canvas-student" class="absolute top-0 left-0 w-full h-full cursor-crosshair touch-none"></canvas>
                         <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-10">
-                            <span class="text-4xl font-serif italic text-slate-400">Sign Here</span>
+                            <span class="text-4xl font-serif italic text-slate-400">請在此簽名</span>
                         </div>
                     </div>
                 </div>
@@ -143,24 +143,24 @@
                         <div class="flex flex-col">
                             <span class="font-bold text-slate-800 flex items-center gap-2">
                                 <span class="w-2 h-2 rounded-full bg-teal-500"></span>
-                                Parent Signature
+                                家長簽名
                             </span>
-                            <span class="text-xs text-slate-400 pl-4">Required for minors</span>
+                            <span class="text-xs text-slate-400 pl-4">未成年人必填</span>
                         </div>
                         <div class="flex gap-2 items-center">
                             <button id="btn-erase-parent" onclick="toggleEraser('parent')" class="text-xs font-bold text-slate-500 border border-slate-200 hover:bg-slate-50 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
                                     <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
                                 </svg>
-                                Eraser
+                                橡皮擦
                             </button>
-                            <button onclick="clearPad('parent')" data-html2canvas-ignore class="text-xs font-bold text-red-500 border border-red-200 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-colors uppercase tracking-wider">Clear</button>
+                            <button onclick="clearPad('parent')" data-html2canvas-ignore class="text-xs font-bold text-red-500 border border-red-200 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-colors uppercase tracking-wider">清除</button>
                         </div>
                     </div>
                     <div class="relative w-full h-40 bg-white rounded-xl border border-slate-200 shadow-inner overflow-hidden hover:border-teal-400 transition-colors">
                         <canvas id="canvas-parent" class="absolute top-0 left-0 w-full h-full cursor-crosshair touch-none"></canvas>
                         <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-10">
-                            <span class="text-4xl font-serif italic text-slate-400">Sign Here</span>
+                            <span class="text-4xl font-serif italic text-slate-400">請在此簽名</span>
                         </div>
                     </div>
                 </div>
@@ -168,7 +168,7 @@
 
             <!-- Footer Date -->
             <div class="flex flex-wrap justify-end items-center gap-2 text-slate-600 mt-8 pt-6 border-t border-slate-100">
-                <span class="font-serif">Date:</span>
+                <span class="font-serif">日期:</span>
                 <div class="bg-slate-100 px-4 py-2 rounded-lg font-mono text-slate-800 font-bold tracking-widest">
                     2025 / <span id="auto-month"></span> / <span id="auto-day"></span>
                 </div>
@@ -187,9 +187,9 @@
         <button id="submit-btn" onclick="submitToServer()" class="group relative flex items-center justify-center gap-3 bg-slate-900 text-white pl-6 pr-8 py-4 rounded-full shadow-2xl hover:bg-slate-800 active:scale-95 transition-all duration-300">
             <div class="absolute inset-0 bg-teal-500 rounded-full opacity-0 group-hover:opacity-20 transition-opacity blur-lg"></div>
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
             </svg>
-            <span class="font-sans font-bold tracking-wide">Submit Document</span>
+            <span class="font-sans font-bold tracking-wide">提交文件</span>
         </button>
     </div>
 
